@@ -16,10 +16,6 @@
 transition:all .2s ease;
 }
 
-.seat.selected{
-transform:scale(1.05);
-}
-
 @keyframes pop{
 0%{transform:scale(1)}
 50%{transform:scale(1.1)}
@@ -87,18 +83,6 @@ Booked
 
 <div class="bg-white border-4 border-gray-200 rounded-[3rem] p-8 shadow-2xl min-w-[320px]">
 
-<div class="flex justify-end mb-10 border-b pb-6">
-
-<div class="w-12 h-12 border-4 border-gray-700 rounded-full flex items-center justify-center opacity-50">
-
-<div class="w-1 h-8 bg-gray-700 rotate-45 absolute"></div>
-
-<div class="w-1 h-8 bg-gray-700 -rotate-45 absolute"></div>
-
-</div>
-
-</div>
-
 <div id="bus-grid" class="space-y-4"></div>
 
 </div>
@@ -115,7 +99,6 @@ Booking Details
 </h2>
 
 <div id="cart-empty" class="text-center py-10 text-gray-400">
-<i class="fa-solid fa-couch text-3xl mb-2 opacity-20"></i>
 <p>No seats selected</p>
 </div>
 
@@ -167,14 +150,22 @@ Confirm
 </div>
 
 
-<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
+import {
+getFirestore,
+collection,
+addDoc,
+deleteDoc,
+doc,
+onSnapshot,
+getDocs
+}
 
 from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
 
 const firebaseConfig = {
 apiKey: "AIzaSyAgkYhpTHF0dU3Wm1WhqsaxTK9zG5GxYpA",
@@ -191,7 +182,6 @@ const db = getFirestore(app);
 const seats={}
 let selected=[]
 
-
 function init(){
 
 for(let r=1;r<=12;r++){
@@ -207,31 +197,44 @@ seats[`13${col}`]={booked:false,name:'',uid:''}
 })
 
 render()
-loadBookings()
+
+listenBookings()
 
 }
 
 
-async function loadBookings(){
+function listenBookings(){
 
-const querySnapshot = await getDocs(collection(db,"bookings"))
+onSnapshot(collection(db,"bookings"),(snapshot)=>{
 
-querySnapshot.forEach((d)=>{
+for(let s in seats){
+seats[s].booked=false
+seats[s].name=''
+seats[s].uid=''
+}
 
-const data=d.data()
+snapshot.forEach((docItem)=>{
+
+const data=docItem.data()
 
 if(seats[data.seat]){
-seats[data.seat]={booked:true,name:data.name,uid:data.uid}
+seats[data.seat]={
+booked:true,
+name:data.name,
+uid:data.uid
+}
 }
 
 })
 
 render()
 
+})
+
 }
 
 
-function toggleSeat(id){
+window.toggleSeat=function(id){
 
 if(seats[id].booked) return
 
@@ -253,7 +256,7 @@ let html=''
 
 for(let r=1;r<=12;r++){
 
-html+=`<div class="flex justify-between items-center">
+html+=`<div class="flex justify-between">
 
 <div class="flex gap-2">
 
@@ -261,8 +264,6 @@ ${renderSeat(r+'A')}
 ${renderSeat(r+'B')}
 
 </div>
-
-<div class="text-gray-300 font-bold text-xs">${r}</div>
 
 <div class="flex gap-2">
 
@@ -276,7 +277,7 @@ ${renderSeat(r+'E')}
 
 }
 
-html+=`<div class="mt-6 pt-6 border-t flex justify-between gap-1">
+html+=`<div class="mt-6 pt-6 border-t flex justify-between">
 
 ${['A','B','C','D','E','F'].map(c=>renderSeat('13'+c)).join('')}
 
@@ -294,16 +295,13 @@ function renderSeat(id){
 const s=seats[id]
 const isSel=selected.includes(id)
 
-let cls="seat w-10 h-11 rounded border flex flex-col items-center justify-center text-[10px] font-bold cursor-pointer "
+let cls="seat w-10 h-11 rounded border flex items-center justify-center text-xs font-bold cursor-pointer "
 
 if(s.booked){
 
-cls+="bg-gray-200 text-gray-500 cursor-not-allowed"
+cls+="bg-gray-300 text-gray-600 cursor-not-allowed"
 
-return `<div class="${cls}" title="Booked by ${s.name}">
-<div>${id}</div>
-<div class="text-[8px]">${s.name}</div>
-</div>`
+return `<div class="${cls}" title="Booked by ${s.name}">${id}</div>`
 
 }
 
@@ -381,11 +379,16 @@ window.processFinalBooking=async function(){
 
 for(const id of selected){
 
+if(seats[id].booked){
+alert("Seat already booked")
+return
+}
+
 const name=document.getElementById(`name-${id}`).value
 const uid=document.getElementById(`uid-${id}`).value
 
-if(!name||!uid){
-alert("Please fill all details")
+if(!name || !uid){
+alert("Fill all details")
 return
 }
 
@@ -396,17 +399,11 @@ uid:uid,
 time:new Date()
 })
 
-seats[id]={booked:true,name,uid}
-
 }
 
 selected=[]
 
 closeModal()
-
-render()
-
-alert("Seats Booked Successfully!")
 
 }
 
@@ -420,25 +417,17 @@ if(password==="NAHI"){
 const snapshot=await getDocs(collection(db,"bookings"))
 
 for(const d of snapshot.docs){
-
 await deleteDoc(doc(db,"bookings",d.id))
-
 }
 
-alert("Bus Reset Successfully")
-
-location.reload()
+alert("Bus Reset")
 
 }
-
 else{
-
-alert("Incorrect password")
-
+alert("Wrong Password")
 }
 
 }
-
 
 init()
 
