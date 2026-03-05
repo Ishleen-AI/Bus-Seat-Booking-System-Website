@@ -30,8 +30,21 @@ Bus Booking Admin Panel
 
 </table>
 
-<script>
 
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+onSnapshot
+}
+
+from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+
+// ADMIN PASSWORD
 const password = prompt("Enter admin password")
 
 if(password !== "AMRITSAR123"){
@@ -41,29 +54,49 @@ window.location.href="index.html"
 
 }
 
-const data = JSON.parse(localStorage.getItem("busBookings")) || {}
 
+// FIREBASE CONFIG
+const firebaseConfig = {
+apiKey: "AIzaSyAgkYhpTHF0dU3Wm1WhqsaxTK9zG5GxYpA",
+authDomain: "bus-seat-booking-system-4a7c0.firebaseapp.com",
+projectId: "bus-seat-booking-system-4a7c0",
+storageBucket: "bus-seat-booking-system-4a7c0.firebasestorage.app",
+messagingSenderId: "1029876783708",
+appId: "1:1029876783708:web:d6bd3c1cf2b06dd345a499"
+};
+
+
+// INITIALIZE FIREBASE
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// TABLE BODY
 const body = document.getElementById("table-body")
+
+
+// REALTIME BOOKINGS LISTENER
+onSnapshot(collection(db,"bookings"),(snapshot)=>{
 
 let rows=""
 
-for(let seat in data){
+snapshot.forEach((doc)=>{
 
-if(data[seat].booked){
+const data = doc.data()
 
 rows+=`
 <tr class="border-b">
-<td class="p-3">${seat}</td>
-<td class="p-3">${data[seat].name}</td>
-<td class="p-3">${data[seat].uid}</td>
+<td class="p-3">${data.seat}</td>
+<td class="p-3">${data.name}</td>
+<td class="p-3">${data.uid}</td>
 </tr>
 `
 
-}
-
-}
+})
 
 body.innerHTML = rows
+
+})
 
 </script>
 
