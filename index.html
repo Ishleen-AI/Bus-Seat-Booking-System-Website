@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -14,6 +15,22 @@
 
 .seat{
 transition:all .2s ease;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+min-width:44px;
+min-height:44px;
+padding:3px;
+border-radius:6px;
+font-size:10px;
+font-weight:600;
+cursor:pointer;
+}
+
+.seat:hover{
+transform:scale(1.05);
 }
 
 @keyframes pop{
@@ -163,7 +180,6 @@ doc,
 onSnapshot,
 getDocs
 }
-
 from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 
@@ -182,6 +198,7 @@ const db = getFirestore(app);
 const seats={}
 let selected=[]
 
+
 function init(){
 
 for(let r=1;r<=12;r++){
@@ -197,7 +214,6 @@ seats[`13${col}`]={booked:false,name:'',uid:''}
 })
 
 render()
-
 listenBookings()
 
 }
@@ -295,13 +311,18 @@ function renderSeat(id){
 const s=seats[id]
 const isSel=selected.includes(id)
 
-let cls="seat w-10 h-11 rounded border flex items-center justify-center text-xs font-bold cursor-pointer "
+let cls="seat border "
 
 if(s.booked){
 
-cls+="bg-gray-300 text-gray-600 cursor-not-allowed"
+cls+="bg-gray-300 text-gray-700 cursor-not-allowed"
 
-return `<div class="${cls}" title="Booked by ${s.name}">${id}</div>`
+return `
+<div class="${cls}" title="Seat ${id} • ${s.name} (${s.uid})">
+<div class="font-bold text-[11px]">${id}</div>
+<div class="text-[9px] break-words">${s.name}</div>
+</div>
+`
 
 }
 
@@ -402,7 +423,6 @@ time:new Date()
 }
 
 selected=[]
-
 closeModal()
 
 }
