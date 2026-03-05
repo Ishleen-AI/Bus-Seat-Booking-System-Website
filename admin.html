@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Admin Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gray-100 p-10">
+
+<h1 class="text-2xl font-bold mb-6">
+Bus Booking Admin Panel
+</h1>
+
+<table class="bg-white shadow rounded w-full">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th class="p-3">Seat</th>
+<th class="p-3">Student Name</th>
+<th class="p-3">UID</th>
+</tr>
+
+</thead>
+
+<tbody id="table-body"></tbody>
+
+</table>
+
+<script>
+
+const password = prompt("Enter admin password")
+
+if(password !== "AMRITSAR123"){
+
+alert("Access denied")
+window.location.href="index.html"
+
+}
+
+const data = JSON.parse(localStorage.getItem("busBookings")) || {}
+
+const body = document.getElementById("table-body")
+
+let rows=""
+
+for(let seat in data){
+
+if(data[seat].booked){
+
+rows+=`
+<tr class="border-b">
+<td class="p-3">${seat}</td>
+<td class="p-3">${data[seat].name}</td>
+<td class="p-3">${data[seat].uid}</td>
+</tr>
+`
+
+}
+
+}
+
+body.innerHTML = rows
+
+</script>
+
+</body>
+</html>
