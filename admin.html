@@ -1,104 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>Admin Dashboard</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Campus Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom scrollbar for admin table */
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px;}
+    </style>
 </head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
 
-<body class="bg-gray-100 p-10">
+    <!-- Header -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-3">
+                <i class="fa-solid fa-shield-halved text-emerald-400 text-2xl"></i>
+                <span>Admin Dashboard</span>
+                <span class="text-xs bg-rose-500 text-white px-2 py-0.5 rounded-full ml-2">Kochar Tech Manifest</span>
+            </h1>
+            <div class="text-sm text-slate-300">
+                <i class="fa-solid fa-lock mr-1"></i> Authorized Personnel Only
+            </div>
+        </div>
+    </header>
 
-<h1 class="text-2xl font-bold mb-6">
-Bus Booking Admin Panel
-</h1>
+    <main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 flex flex-col">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden">
+            
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h2 class="text-lg font-bold text-gray-800">
+                    <i class="fa-solid fa-list-check text-rose-500 mr-2"></i> Real-time Passenger Manifest
+                </h2>
+                <button onclick="refreshData()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-lg transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh Data
+                </button>
+            </div>
 
-<table class="bg-white shadow rounded w-full">
+            <!-- Table Container -->
+            <div class="flex-1 overflow-x-auto custom-scroll p-6">
+                <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-600 shadow-sm">
+                        <tr>
+                            <th class="p-4 border-b font-bold rounded-tl-lg">Seat</th>
+                            <th class="p-4 border-b font-bold">Student Name</th>
+                            <th class="p-4 border-b font-bold">UID</th>
+                            <th class="p-4 border-b font-bold">Section</th>
+                            <th class="p-4 border-b font-bold">Contact Number</th>
+                            <th class="p-4 border-b font-bold rounded-tr-lg">Logged By (Email)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body" class="divide-y divide-slate-100">
+                        <!-- Data injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-<thead class="bg-gray-200">
+    <script>
+        // NOTE: Because this is a separate local HTML file with no backend server, 
+        // it cannot automatically read the bookings made on the index.html page.
+        // I have added mock data below so you can see how the layout looks!
+        // To make this fully functional, you will need a cloud database.
 
-<tr>
-<th class="p-3">Seat</th>
-<th class="p-3">Student Name</th>
-<th class="p-3">UID</th>
-</tr>
+        const mockBookings = [
+            { id: "1A", name: "Avya Juneja", uid: "24BAI70259", section: "24AML2B", phone: "9056376052", entryEmail: "admin@university.edu" },
+            { id: "1B", name: "Bhavishya", uid: "24BAI70011", section: "24AML-2A", phone: "8950793558", entryEmail: "rep1@university.edu" },
+            { id: "3C", name: "Jatin Kumar", uid: "24BAI70186", section: "24AML 6A", phone: "7988585464", entryEmail: "admin@university.edu" },
+            { id: "13F", name: "Asha", uid: "24BAI70647", section: "24AML-10A", phone: "7696357049", entryEmail: "rep2@university.edu" }
+        ];
 
-</thead>
+        function loadManifest() {
+            const tbody = document.getElementById('admin-table-body');
+            let rows = '';
 
-<tbody id="table-body"></tbody>
+            if (mockBookings.length === 0) {
+                rows = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No seats have been booked yet.</td></tr>`;
+            } else {
+                mockBookings.forEach(booking => {
+                    rows += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 border-b font-bold text-slate-800">${booking.id}</td>
+                            <td class="p-4 border-b text-slate-700 capitalize font-medium">${booking.name}</td>
+                            <td class="p-4 border-b text-emerald-600 font-mono font-bold bg-emerald-50/50">${booking.uid}</td>
+                            <td class="p-4 border-b text-slate-700">${booking.section}</td>
+                            <td class="p-4 border-b text-slate-700">${booking.phone}</td>
+                            <td class="p-4 border-b text-blue-600 text-sm font-medium bg-blue-50/50">${booking.entryEmail}</td>
+                        </tr>
+                    `;
+                });
+            }
 
-</table>
+            tbody.innerHTML = rows;
+        }
 
+        function refreshData() {
+            // In a real app with a database, this would fetch new data.
+            alert("Data refreshed! (Currently displaying mock data as there is no database connected).");
+            loadManifest();
+        }
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-
-import {
-getFirestore,
-collection,
-onSnapshot
-}
-
-from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-
-// ADMIN PASSWORD
-const password = prompt("Enter admin password")
-
-if(password !== "AMRITSAR123"){
-
-alert("Access denied")
-window.location.href="index.html"
-
-}
-
-
-// FIREBASE CONFIG
-const firebaseConfig = {
-apiKey: "AIzaSyAgkYhpTHF0dU3Wm1WhqsaxTK9zG5GxYpA",
-authDomain: "bus-seat-booking-system-4a7c0.firebaseapp.com",
-projectId: "bus-seat-booking-system-4a7c0",
-storageBucket: "bus-seat-booking-system-4a7c0.firebasestorage.app",
-messagingSenderId: "1029876783708",
-appId: "1:1029876783708:web:d6bd3c1cf2b06dd345a499"
-};
-
-
-// INITIALIZE FIREBASE
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-
-// TABLE BODY
-const body = document.getElementById("table-body")
-
-
-// REALTIME BOOKINGS LISTENER
-onSnapshot(collection(db,"bookings"),(snapshot)=>{
-
-let rows=""
-
-snapshot.forEach((doc)=>{
-
-const data = doc.data()
-
-rows+=`
-<tr class="border-b">
-<td class="p-3">${data.seat}</td>
-<td class="p-3">${data.name}</td>
-<td class="p-3">${data.uid}</td>
-</tr>
-`
-
-})
-
-body.innerHTML = rows
-
-})
-
-</script>
-
+        window.onload = loadManifest;
+    </script>
 </body>
 </html>
