@@ -297,24 +297,35 @@
         function renderSeat(id) {
             const s = seats[id];
             const isSel = selected.includes(id);
-            let cls = "seat relative w-10 h-11 sm:w-12 sm:h-14 rounded-t-xl rounded-b-md border-2 flex items-center justify-center text-xs sm:text-sm font-bold select-none cursor-pointer ";
+            
+            // Adjust to flex-col to allow stacking seat ID and student name gracefully
+            let cls = "seat relative w-10 h-11 sm:w-12 sm:h-14 rounded-t-xl rounded-b-md border-2 flex flex-col items-center justify-center text-xs sm:text-sm font-bold select-none cursor-pointer overflow-hidden ";
             let title = `Seat ${id}`;
             let cushion = "bg-emerald-100";
+            let content = `<span class="z-10 mb-1.5">${id}</span>`;
             
             if(s.booked) {
-                cls += "bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed";
+                cls += "bg-slate-200 border-slate-300 text-slate-500 cursor-not-allowed";
                 title = `Booked by ${s.name}`;
                 cushion = "bg-slate-300";
+                
+                // Get the first name to fit the small box area
+                const firstName = s.name.split(' ')[0];
+                content = `
+                    <span class="z-10 text-[9px] sm:text-[10px] leading-none mt-1 sm:mt-0 opacity-70">${id}</span>
+                    <span class="z-10 text-[8px] sm:text-[9px] font-bold leading-tight truncate w-full text-center px-0.5 mb-1.5 text-slate-700 capitalize">${firstName}</span>
+                `;
             } else if(isSel) {
                 cls += "bg-rose-500 border-rose-600 text-white animate-pop shadow-md shadow-rose-200";
                 cushion = "bg-rose-600";
             } else {
                 cls += "bg-white border-emerald-500 text-slate-600 hover:bg-emerald-50";
             }
+            
             return `
                 <div class="${cls}" onclick="toggleSeat('${id}')" title="${title}">
                     <div class="absolute bottom-1 w-[70%] h-2 sm:h-2.5 rounded-[3px] ${cushion}"></div>
-                    <span class="z-10 mb-1.5">${id}</span>
+                    ${content}
                 </div>
             `;
         }
