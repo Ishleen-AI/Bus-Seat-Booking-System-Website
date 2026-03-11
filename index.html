@@ -1,433 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Campus Express Bus Booking</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-<style>
-
-body{
-padding-top:10px;
-}
-
-.seat{
-width:48px;
-min-height:48px;
-padding:4px;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-text-align:center;
-font-size:10px;
-font-weight:600;
-border-radius:6px;
-transition:all .2s ease;
-word-break:break-word;
-}
-
-.seat:hover{
-transform:scale(1.05);
-}
-
-.bus-container{
-max-width:420px;
-margin:auto;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Express - Bus Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .seat { transition: all 0.2s ease; }
+        .seat.selected { transform: scale(1.05); }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+        .animate-pop { animation: pop 0.3s ease-out forwards; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px;}
+    </style>
 </head>
-
-<body class="bg-gray-100 font-sans text-gray-800 min-h-screen">
-
-
-<header class="bg-slate-900 text-white p-4 shadow-lg">
-
-<div class="max-w-6xl mx-auto flex justify-between items-center">
-
-<h1 class="text-xl font-bold">
-<i class="fa-solid fa-bus-simple mr-2 text-rose-500"></i>
-Campus Express
-</h1>
-
-<div class="flex gap-3">
-
-<a href="admin.html" class="bg-emerald-500 px-3 py-1 rounded text-sm">
-Admin Panel
-</a>
-
-<button onclick="resetBus()" class="bg-red-500 px-3 py-1 rounded text-sm">
-Reset Bus
-</button>
-
-</div>
-
-</div>
-
-</header>
-
-
-
-<main class="max-w-6xl mx-auto p-6 flex flex-col lg:flex-row gap-10">
-
-<div class="flex-1 flex justify-center">
-
-<div class="bus-container bg-white border-4 border-gray-200 rounded-[2rem] p-6 shadow-xl">
-
-<div id="bus-grid" class="space-y-3"></div>
-
-</div>
-
-</div>
-
-
-<div class="lg:w-80">
-
-<div class="bg-white p-6 rounded-2xl shadow-lg border">
-
-<h2 class="text-lg font-bold border-b pb-3 mb-4 text-slate-700">
-Booking Details
-</h2>
-
-<div id="cart-empty" class="text-center py-10 text-gray-400">
-No seats selected
-</div>
-
-<div id="cart-active" class="hidden">
-
-<div id="selected-list" class="flex flex-wrap gap-2 mb-6"></div>
-
-<button onclick="openBookingModal()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl">
-Book Selected Seats
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</main>
-
-
-
-<div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-
-<div class="bg-white w-full max-w-md rounded-2xl shadow-2xl">
-
-<div class="p-6 border-b flex justify-between">
-<h3 class="font-bold text-lg">Enter Student Details</h3>
-<button onclick="closeModal()">X</button>
-</div>
-
-<div id="modal-body" class="p-6 space-y-4 max-h-80 overflow-y-auto"></div>
-
-<div class="p-4 border-t flex justify-end gap-3">
-
-<button onclick="closeModal()">Cancel</button>
-
-<button onclick="processFinalBooking()" class="bg-emerald-500 text-white px-5 py-2 rounded">
-Confirm
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-deleteDoc,
-doc,
-onSnapshot,
-getDocs
-}
-from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-
-const firebaseConfig = {
-apiKey: "AIzaSyAgkYhpTHF0dU3Wm1WhqsaxTK9zG5GxYpA",
-authDomain: "bus-seat-booking-system-4a7c0.firebaseapp.com",
-projectId: "bus-seat-booking-system-4a7c0",
-storageBucket: "bus-seat-booking-system-4a7c0.firebasestorage.app",
-messagingSenderId: "1029876783708",
-appId: "1:1029876783708:web:d6bd3c1cf2b06dd345a499"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const seats={}
-let selected=[]
-let bookedUIDs=new Set()
-
-
-function init(){
-
-for(let r=1;r<=12;r++){
-['A','B','C','D','E'].forEach(col=>{
-seats[`${r}${col}`]={booked:false,name:'',uid:''}
-})
-}
-
-['A','B','C','D','E','F'].forEach(col=>{
-seats[`13${col}`]={booked:false,name:'',uid:''}
-})
-
-render()
-listenBookings()
-
-}
-
-
-function listenBookings(){
-
-onSnapshot(collection(db,"bookings"),(snapshot)=>{
-
-bookedUIDs.clear()
-
-for(let s in seats){
-seats[s].booked=false
-seats[s].name=''
-seats[s].uid=''
-}
-
-snapshot.forEach((docItem)=>{
-
-const data=docItem.data()
-
-bookedUIDs.add(data.uid)
-
-if(seats[data.seat]){
-seats[data.seat]={
-booked:true,
-name:data.name,
-uid:data.uid
-}
-}
-
-})
-
-render()
-
-})
-
-}
-
-
-window.toggleSeat=function(id){
-
-if(seats[id].booked) return
-
-const idx=selected.indexOf(id)
-
-if(idx>-1) selected.splice(idx,1)
-else selected.push(id)
-
-render()
-
-}
-
-
-function render(){
-
-const grid=document.getElementById('bus-grid')
-
-let html=''
-
-for(let r=1;r<=12;r++){
-
-html+=`<div class="flex justify-between">
-
-<div class="flex gap-2">
-${renderSeat(r+'A')}
-${renderSeat(r+'B')}
-</div>
-
-<div class="flex gap-2">
-${renderSeat(r+'C')}
-${renderSeat(r+'D')}
-${renderSeat(r+'E')}
-</div>
-
-</div>`
-
-}
-
-html+=`<div class="mt-5 pt-5 border-t flex justify-between">
-${['A','B','C','D','E','F'].map(c=>renderSeat('13'+c)).join('')}
-</div>`
-
-grid.innerHTML=html
-
-updateCart()
-
-}
-
-
-function renderSeat(id){
-
-const s=seats[id]
-const isSel=selected.includes(id)
-
-let cls="seat border "
-
-if(s.booked){
-
-cls+="bg-gray-300 text-gray-700 cursor-not-allowed"
-
-return `
-<div class="${cls}" title="Seat ${id} • ${s.name} (${s.uid})">
-<div class="font-bold">${id}</div>
-<div class="text-[9px]">${s.name}</div>
-</div>
-`
-
-}
-
-else if(isSel){
-
-cls+="bg-rose-500 text-white"
-
-}
-
-else{
-
-cls+="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-
-}
-
-return `<div class="${cls}" onclick="toggleSeat('${id}')">${id}</div>`
-
-}
-
-
-function updateCart(){
-
-const empty=document.getElementById('cart-empty')
-const active=document.getElementById('cart-active')
-const list=document.getElementById('selected-list')
-
-if(selected.length===0){
-
-empty.classList.remove('hidden')
-active.classList.add('hidden')
-
-}
-
-else{
-
-empty.classList.add('hidden')
-active.classList.remove('hidden')
-
-list.innerHTML=selected.map(id=>`<span class="bg-rose-100 text-rose-600 px-3 py-1 rounded text-xs">${id}</span>`).join('')
-
-}
-
-}
-
-
-window.openBookingModal=function(){
-
-const body=document.getElementById('modal-body')
-
-body.innerHTML=selected.map(id=>`
-
-<div>
-
-<p class="font-bold text-rose-500 mb-2">Seat ${id}</p>
-
-<input id="name-${id}" placeholder="Student Name" class="w-full border p-2 mb-2">
-
-<input id="uid-${id}" placeholder="Student UID" class="w-full border p-2">
-
-</div>
-
-`).join('')
-
-document.getElementById('modal').classList.replace('hidden','flex')
-
-}
-
-
-window.closeModal=function(){
-document.getElementById('modal').classList.replace('flex','hidden')
-}
-
-
-window.processFinalBooking=async function(){
-
-for(const id of selected){
-
-const name=document.getElementById(`name-${id}`).value
-const uid=document.getElementById(`uid-${id}`).value
-
-if(!name || !uid){
-alert("Fill all details")
-return
-}
-
-if(bookedUIDs.has(uid)){
-alert("This UID has already booked a seat")
-return
-}
-
-await addDoc(collection(db,"bookings"),{
-seat:id,
-name:name,
-uid:uid,
-time:new Date()
-})
-
-}
-
-selected=[]
-closeModal()
-
-}
-
-
-window.resetBus=async function(){
-
-const password=prompt("Enter Admin Password")
-
-if(password==="NAHI"){
-
-const snapshot=await getDocs(collection(db,"bookings"))
-
-for(const d of snapshot.docs){
-await deleteDoc(doc(db,"bookings",d.id))
-}
-
-alert("Bus Reset")
-
-}
-else{
-alert("Wrong Password")
-}
-
-}
-
-init()
-
-</script>
-
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen overflow-hidden" id="body-container">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-bus-simple mr-2 text-rose-500 text-2xl"></i>
+                    <span>Campus Express</span>
+                </div>
+                <span class="text-xs bg-rose-500 text-white px-2 py-0.5 rounded-full ml-1 sm:ml-0 w-max">Kochar Tech Visit</span>
+            </h1>
+            <div class="flex items-center gap-4">
+                <div id="user-display" class="hidden text-sm text-slate-300 items-center gap-2">
+                    <i class="fa-solid fa-user-circle"></i> <span id="current-user-email" class="hidden sm:block"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-8 flex flex-col lg:flex-row gap-8 h-[calc(100vh-76px)] overflow-y-auto custom-scroll">
+        
+        <!-- Left Column: The Bus -->
+        <div class="flex-1 flex flex-col items-center">
+            <div class="w-full max-w-md bg-white p-4 rounded-xl shadow-sm mb-6 flex justify-around text-sm border font-semibold text-slate-600">
+                <div class="flex items-center gap-2"><div class="w-4 h-4 border-2 border-emerald-500 bg-white rounded"></div> Available</div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-rose-500 rounded shadow-sm shadow-rose-200"></div> Selected</div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-slate-200 border-2 border-slate-300 rounded"></div> Booked</div>
+            </div>
+
+            <!-- Bus Layout -->
+            <div class="bg-white border-4 border-slate-200 rounded-[3rem] p-6 sm:p-8 relative shadow-xl min-w-[340px] mb-10">
+                <div class="flex justify-end mb-8 border-b-2 border-dashed border-slate-200 pb-6">
+                    <div class="w-12 h-12 border-4 border-slate-700 rounded-full flex items-center justify-center opacity-70">
+                        <div class="w-1.5 h-8 bg-slate-700 rotate-45 absolute"></div>
+                        <div class="w-1.5 h-8 bg-slate-700 -rotate-45 absolute"></div>
+                    </div>
+                </div>
+                <div id="bus-grid" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- Right Column: Summary -->
+        <div class="lg:w-80 shrink-0">
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 sticky top-4">
+                <h2 class="text-lg font-bold border-b pb-3 mb-4 text-slate-800">Booking Summary</h2>
+                
+                <div id="cart-empty" class="text-center py-10 text-slate-400">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-couch text-2xl text-slate-300"></i>
+                    </div>
+                    <p class="font-medium text-sm">No seats selected</p>
+                </div>
+
+                <div id="cart-active" class="hidden flex-col h-full">
+                    <div id="selected-list" class="flex flex-wrap gap-2 mb-6 max-h-[200px] overflow-y-auto p-1 custom-scroll"></div>
+                    <div class="mt-auto pt-4 border-t border-slate-100">
+                        <button onclick="openBookingModal()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-rose-200 flex justify-center items-center gap-2">
+                            Proceed to Book <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center animate-pop">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">Access Portal</h2>
+            <p class="text-sm text-slate-500 mb-6">Please enter your email to access the Kochar Tech Visit booking system.</p>
+            <input type="email" id="access-email" placeholder="student@university.edu" class="w-full p-3 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-center">
+            <button onclick="grantAccess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-200">
+                Enter System
+            </button>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[90] p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-pop flex flex-col max-h-[90vh]">
+            <div class="p-5 bg-slate-50 border-b flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-800">Verify Passenger</h3>
+                    <p class="text-xs text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-lock"></i> Restricted to official visit list.</p>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full shadow-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-body" class="p-6 overflow-y-auto space-y-4 custom-scroll bg-slate-50/50"></div>
+            <div id="error-message" class="hidden mx-6 p-3 bg-rose-100 text-rose-700 text-sm font-semibold rounded-lg border border-rose-200 text-center"></div>
+            <div class="p-4 bg-white border-t flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-5 py-2.5 text-slate-500 font-semibold hover:bg-slate-100 rounded-xl transition">Cancel</button>
+                <button onclick="processFinalBooking()" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition shadow-md shadow-emerald-200 flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i> Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database with the syntax error fixed
+        const studentDatabase = {
+            "24BAI70259": { "name": "Avya Juneja", "section": "24AML2B", "phone": "9056376052" },
+            "24BAI70415": { "name": "Heman", "section": "24AML NTPP -2B", "phone": "6355756628" },
+            "24BAI70145": { "name": "Vidhi gupta", "section": "24AML 6", "phone": "9877868760" },
+            "24BAI70453": { "name": "Nazra Kamar Ansari", "section": "24AML-8B", "phone": "9681932663" },
+            "24BAI70011": { "name": "Bhavishya", "section": "24AML-2A", "phone": "8950793558" },
+            "24BAI70383": { "name": "vaishnavi mehta", "section": "24AML-3A", "phone": "9996645879" },
+            "24BAI70411": { "name": "Aditi Sharma", "section": "24AML-8A", "phone": "8950809220" },
+            "24BAI70646": { "name": "Kirti Devi", "section": "24AML-10 A", "phone": "9729881315" },
+            "24BAI70186": { "name": "Jatin Kumar", "section": "24AML 6A", "phone": "7988585464" },
+            "24BAI70647": { "name": "Asha", "section": "24AML-10A", "phone": "7696357049" },
+            "24BAI70194": { "name": "Manish kumar", "section": "24AML-6(A)", "phone": "9306712353" },
+            "24BAI70192": { "name": "Shavya Sharma", "section": "24AML 6A", "phone": "6284776004" },
+            "24BAI70193": { "name": "Arunabh Mishra", "section": "24AML6A", "phone": "9463459259" },
+            "24BAI70330": { "name": "Nitin Rawat", "section": "24AML-3A", "phone": "8307135863" },
+            "24BAI70173": { "name": "Nimish Taneja", "section": "24 AML 6A", "phone": "7015799380" },
+            "24BAI70152": { "name": "Komal", "section": "24AML 6A", "phone": "8708481718" },
+            "24BAI70591": { "name": "Runali Behera", "section": "24AML-3B", "phone": "9015381130" },
+            "24BAI70086": { "name": "Jashmandeep Kaur Bal", "section": "24AML-2A", "phone": "9548180418" },
+            "24BAI70785": { "name": "Chhavi Kamboj", "section": "24AML-11(A)", "phone": "8708535939" },
+            "24BAI70816": { "name": "Prachi Dahiya", "section": "24AML - 11(B)", "phone": "8295471660" },
+            "24BAI70196": { "name": "Varun", "section": "24AML-6A", "phone": "7652939699" },
+            "24BAI70478": { "name": "Stuti Sood", "section": "24AML-8B", "phone": "9501530024" },
+            "24BAI70838": { "name": "Daksh Pratap Singh", "section": "24AML 11(B)", "phone": "6230921269" },
+            "24BAI70724": { "name": "Akarsh Kishor", "section": "24AML10-B", "phone": "9810423278" },
+            "24BAI70802": { "name": "Manvi", "section": "24AML-11(A)", "phone": "9253430522" },
+            "24BAI70793": { "name": "Kushaan Aggarwal", "section": "24AML NTPP 3A", "phone": "9310840578" },
+            "24BAI70824": { "name": "Saarthak Tyagi", "section": "24AML 11B", "phone": "9315739418" },
+            "24BAI70112": { "name": "Jiya Sharma", "section": "24AML-5B", "phone": "9354408836" },
+            "24BAI70749": { "name": "Anurag Bhaskar", "section": "24AML 11A", "phone": "8448416935" },
+            "24BAI70963": { "name": "Priyom mukherjee", "section": "24bai70963", "phone": "8826653486" },
+            "24BAI70120": { "name": "Harmanpreet Singh", "section": "24AML 5B", "phone": "9115974400" },
+            "24BAI70135": { "name": "Angel Saini", "section": "24AML-5B", "phone": "9015197830" },
+            "24BAI70774": { "name": "Paarth Haikerwal", "section": "24AML11-A", "phone": "7297948935" },
+            "24BAI70254": { "name": "Kanushri", "section": "24AML 2B", "phone": "7889076949" },
+            "24BAI70419": { "name": "Suryakant Kumar", "section": "24AML 8A", "phone": "6207749251" },
+            "24BAI70346": { "name": "Anmol kriplani", "section": "24AML-7B", "phone": "8858746825" },
+            "24BAI70178": { "name": "HarshPreet Singh", "section": "24AML-2(B)", "phone": "7901845195" },
+            "24BAI70805": { "name": "Aryan Saini", "section": "24AML4A", "phone": "6268980973" },
+            "24BAI70852": { "name": "Sukhraj Kaur", "section": "24AML-11B", "phone": "6280022159" },
+            "24BAI70844": { "name": "Vanshika Pandey", "section": "24AML 4B", "phone": "9877128819" },
+            "24BAI70843": { "name": "Suneet Bharangar", "section": "24AML 4B", "phone": "7417188779" },
+            "24BAI70434": { "name": "Vansh Sudera", "section": "24AML 3A", "phone": "7230000978" },
+            "24BAI70448": { "name": "Aarushi Aggarwal", "section": "24aml 8 A", "phone": "8950606554" },
+            "23BAI70178": { "name": "Mokshda Sharma", "section": "23AML-2 (B)", "phone": "8955399058" },
+            "23BAI70129": { "name": "Deval garg", "section": "23AML6-B", "phone": "7814558250" },
+            "22BAI70079": { "name": "Ashmeet Kaur", "section": "22AML 5A", "phone": "9914954909" },
+            "22BAI70031": { "name": "Samarpunit Kaur", "section": "22AML 4B", "phone": "9056584941" },
+            "22BAI70064": { "name": "Abhinav Nirwal", "section": "22AML 8B", "phone": "8899297763" },
+            "22BAI70066": { "name": "Ankitaa Pupneja", "section": "22AML9 - A", "phone": "8295292872" },
+            "23BAI70725": { "name": "Bhawika", "section": "23AML 2A", "phone": "9729543437" },
+            "24BAI70256": { "name": "sneha bagga", "section": "24AML 6B", "phone": "9877883856" },
+            "24BAI70026": { "name": "Anmoldeep", "section": "24AML 2A", "phone": "7888710087" },
+            "24BAI70004": { "name": "Rehan khan", "section": "24AIT KRG G1", "phone": "7658010229" },
+            "24BAI70018": { "name": "Harshit garg", "section": "24AML 5A", "phone": "9996190898" },
+            "24BAI70015": { "name": "Tanisha", "section": "24AIT NTPP 2", "phone": "7351431000" },
+            "24BAI70023": { "name": "Muskan", "section": "24AML 5A", "phone": "7988163007" },
+            "24BAI70033": { "name": "Prabhjot", "section": "24AML 6B", "phone": "7009473784" },
+            "24BAI70353": { "name": "Chetna", "section": "24AML 7B", "phone": "7477005127" },
+            "23BAI70447": { "name": "Manav Sahni", "section": "23AML 4B", "phone": "6397483815" },
+            "24BAI70845": { "name": "Akshaj", "section": "24AML 4B", "phone": "7317319091" },
+            "24BAI70262": { "name": "Ishleen", "section": "24AML 6B", "phone": "7719555828" }
+        };
+
+        const seats = {};
+        let selected = [];
+        let loggedInEmail = "";
+
+        function init() {
+            for(let r=1; r<=12; r++) {
+                ['A','B','C','D','E'].forEach(col => {
+                    seats[`${r}${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+                });
+            }
+            ['A','B','C','D','E','F'].forEach(col => {
+                seats[`13${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+            });
+            render();
+        }
+
+        function grantAccess() {
+            const emailInput = document.getElementById('access-email').value;
+            if(!emailInput || !emailInput.includes('@')) {
+                alert("Please enter a valid email address to continue.");
+                return;
+            }
+            loggedInEmail = emailInput;
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('body-container').classList.remove('overflow-hidden');
+            document.getElementById('current-user-email').innerText = loggedInEmail;
+            document.getElementById('user-display').classList.remove('hidden');
+            document.getElementById('user-display').classList.add('flex');
+        }
+
+        function toggleSeat(id) {
+            if(seats[id].booked) {
+                alert(`Seat ${id} is already booked!`);
+                return;
+            }
+            const idx = selected.indexOf(id);
+            if(idx > -1) selected.splice(idx, 1);
+            else selected.push(id);
+            render();
+        }
+
+        function render() {
+            const grid = document.getElementById('bus-grid');
+            let html = '';
+            for(let r=1; r<=12; r++) {
+                html += `<div class="flex justify-between items-center group relative">
+                    <div class="flex gap-2 sm:gap-3">${renderSeat(r+'A')}${renderSeat(r+'B')}</div>
+                    <div class="w-8 sm:w-10 text-center text-slate-300 font-black text-sm">${r}</div>
+                    <div class="flex gap-2 sm:gap-3">${renderSeat(r+'C')}${renderSeat(r+'D')}${renderSeat(r+'E')}</div>
+                </div>`;
+            }
+            html += `<div class="mt-8 pt-6 border-t border-slate-200 flex justify-between gap-1 relative">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white px-2 text-xs font-bold text-slate-400">Back Row</div>
+                ${['A','B','C','D','E','F'].map(c => renderSeat('13'+c)).join('')}
+            </div>`;
+            grid.innerHTML = html;
+            updateCart();
+        }
+
+        function renderSeat(id) {
+            const s = seats[id];
+            const isSel = selected.includes(id);
+            let cls = "seat relative w-10 h-11 sm:w-12 sm:h-14 rounded-t-xl rounded-b-md border-2 flex items-center justify-center text-xs sm:text-sm font-bold select-none cursor-pointer ";
+            let title = `Seat ${id}`;
+            let cushion = "bg-emerald-100";
+            
+            if(s.booked) {
+                cls += "bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed";
+                title = `Booked by ${s.name}`;
+                cushion = "bg-slate-300";
+            } else if(isSel) {
+                cls += "bg-rose-500 border-rose-600 text-white animate-pop shadow-md shadow-rose-200";
+                cushion = "bg-rose-600";
+            } else {
+                cls += "bg-white border-emerald-500 text-slate-600 hover:bg-emerald-50";
+            }
+            return `
+                <div class="${cls}" onclick="toggleSeat('${id}')" title="${title}">
+                    <div class="absolute bottom-1 w-[70%] h-2 sm:h-2.5 rounded-[3px] ${cushion}"></div>
+                    <span class="z-10 mb-1.5">${id}</span>
+                </div>
+            `;
+        }
+
+        function updateCart() {
+            const empty = document.getElementById('cart-empty');
+            const active = document.getElementById('cart-active');
+            const list = document.getElementById('selected-list');
+
+            if(selected.length === 0) {
+                empty.classList.remove('hidden');
+                active.classList.add('hidden');
+                active.classList.remove('flex');
+            } else {
+                empty.classList.add('hidden');
+                active.classList.remove('hidden');
+                active.classList.add('flex');
+                list.innerHTML = selected.map(id => `
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 animate-pop">
+                        ${id} <i class="fa-solid fa-xmark text-xs cursor-pointer hover:text-rose-900" onclick="toggleSeat('${id}')"></i>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function checkUID(seatId) {
+            const uidInput = document.getElementById(`uid-${seatId}`);
+            const nameInput = document.getElementById(`name-${seatId}`);
+            const statusIcon = document.getElementById(`status-${seatId}`);
+            const enteredUID = uidInput.value.trim().toUpperCase();
+            
+            if (studentDatabase[enteredUID]) {
+                nameInput.value = studentDatabase[enteredUID].name;
+                uidInput.classList.remove('border-slate-300', 'border-rose-500');
+                uidInput.classList.add('border-emerald-500', 'bg-emerald-50');
+                statusIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i>';
+            } else {
+                nameInput.value = '';
+                statusIcon.innerHTML = '';
+                uidInput.classList.remove('border-emerald-500', 'bg-emerald-50');
+                if (enteredUID.length > 5) uidInput.classList.add('border-rose-500');
+                else { uidInput.classList.add('border-slate-300'); uidInput.classList.remove('border-rose-500'); }
+            }
+        }
+
+        function openBookingModal() {
+            if(selected.length === 0) return;
+            document.getElementById('error-message').classList.add('hidden');
+            const body = document.getElementById('modal-body');
+            body.innerHTML = selected.map(id => `
+                <div class="p-4 border border-slate-200 rounded-xl bg-white shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-couch text-rose-500"></i> Seat ${id}
+                        </p>
+                        <span id="status-${id}"></span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">UNIVERSITY UID</label>
+                            <input type="text" id="uid-${id}" onkeyup="checkUID('${id}')" placeholder="e.g. 24BAI70259" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm outline-none transition uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">STUDENT NAME (AUTO-FILLED)</label>
+                            <input type="text" id="name-${id}" readonly placeholder="Type UID to fetch name" class="w-full p-2.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-lg text-sm outline-none cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('modal').classList.replace('hidden', 'flex');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.replace('flex', 'hidden');
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('error-message');
+            errDiv.innerText = msg;
+            errDiv.classList.remove('hidden');
+        }
+
+        function processFinalBooking() {
+            const newEntries = [];
+            const tempUIDs = new Set();
+
+            for(const id of selected) {
+                const uid = document.getElementById(`uid-${id}`).value.trim().toUpperCase();
+                if(!uid) return showError(`Please enter a UID for Seat ${id}.`);
+                if(!studentDatabase[uid]) return showError(`UID ${uid} is NOT in the authorized list.`);
+                if(tempUIDs.has(uid)) return showError(`UID "${uid}" is entered multiple times in this form.`);
+                tempUIDs.add(uid);
+                
+                const student = studentDatabase[uid];
+                newEntries.push({ id, uid, name: student.name, section: student.section, phone: student.phone });
+            }
+
+            for(const entry of newEntries) {
+                if(seats[entry.id].booked) return showError(`Seat ${entry.id} was just booked by someone else!`);
+                for(const existingId in seats) {
+                    if(seats[existingId].booked && seats[existingId].uid === entry.uid) {
+                        return showError(`Student "${entry.name}" has already booked seat ${existingId}. Only one seat per student allowed.`);
+                    }
+                }
+            }
+
+            newEntries.forEach(entry => {
+                seats[entry.id] = { booked: true, ...entry, entryEmail: loggedInEmail };
+            });
+
+            selected = [];
+            closeModal();
+            render();
+            setTimeout(() => alert('Booking Confirmed successfully!'), 100);
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
