@@ -170,12 +170,30 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // =====================================================================
+        // 🚨 1. PASTE YOUR FIREBASE CONFIGURATION HERE! 🚨
+        // You can find this in your Firebase Console -> Project Settings -> General
+        // =====================================================================
+        const myLocalConfig = {
+            apiKey: "AIzaSyAgkYhptHF0dU3Wm1WhqsaxTK9zG5GxYpA",
+            authDomain: "bus-seat-booking-system-4a7c0.firebaseapp.com",
+            projectId: "bus-seat-booking-system-4a7c0",
+            storageBucket: "bus-seat-booking-system-4a7c0.firebasestorage.app",
+            messagingSenderId: "1029876783708",
+            appId: "1:1029876783708:web:d6bd3c1cf2b06dd345a499"
+        };
+
+        // Determine if we are running in the dynamic Canvas Environment or Locally
+        const isCanvasEnv = typeof __firebase_config !== 'undefined';
+        const firebaseConfig = isCanvasEnv ? JSON.parse(__firebase_config) : myLocalConfig;
+
         // Initialize Firebase
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // Define your database collection path variable
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'campus-express';
 
         const studentDatabase = {
             "24BAI70259": { "name": "Avya Juneja", "section": "24AML2B", "phone": "9056376052" },
@@ -261,7 +279,7 @@
             seats[`13${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
         });
 
-        // Setup Firebase Authentication
+        // Setup Firebase Authentication First
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -270,30 +288,35 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Auth error:", error);
+                console.warn("🚨 Auth Status: Running without user authentication. Since your database rules are public, database syncing will still work successfully!", error.message);
             }
         };
-        initAuth();
+        
+        // Wait for Authentication steps to complete before attempting Database Connection
+        await initAuth();
 
         // Listen for Real-time database updates from other devices
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            if (user) {
-                const seatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'bus_seats');
-                onSnapshot(seatsRef, (snapshot) => {
-                    snapshot.forEach(document => {
-                        if(seats[document.id]) {
-                            seats[document.id] = { ...seats[document.id], ...document.data() };
-                        }
-                    });
-                    render();
-                    if (!document.getElementById('admin-modal').classList.contains('hidden')) {
-                        updateAdminTable();
+            
+            // Allow proceeding without a user ONLY if you are running locally (using your public database rules). 
+            if (!user && isCanvasEnv) return;
+
+            const seatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'bus_seats');
+            
+            onSnapshot(seatsRef, (snapshot) => {
+                snapshot.forEach(document => {
+                    if(seats[document.id]) {
+                        seats[document.id] = { ...seats[document.id], ...document.data() };
                     }
-                }, (error) => {
-                    console.error("Error listening to database:", error);
                 });
-            }
+                render();
+                if (!document.getElementById('admin-modal').classList.contains('hidden')) {
+                    updateAdminTable();
+                }
+            }, (error) => {
+                console.error("🚨 DATABASE ERROR: Please verify you pasted your firebaseConfig keys properly at the top of the script!", error);
+            });
         });
 
         // Exposing functions to the global window object (required since we are now a JS Module)
