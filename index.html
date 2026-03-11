@@ -36,6 +36,9 @@
                 <div id="user-display" class="hidden text-sm text-slate-300 items-center gap-2">
                     <i class="fa-solid fa-user-circle"></i> <span id="current-user-email" class="hidden sm:block"></span>
                 </div>
+                <button onclick="openAdminPanel()" class="bg-slate-700 hover:bg-slate-600 px-3 sm:px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i> <span class="hidden sm:block">Admin</span>
+                </button>
             </div>
         </div>
     </header>
@@ -122,6 +125,45 @@
         </div>
     </div>
 
+    <!-- Admin Panel Modal -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center z-[110] p-4">
+        <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden animate-pop flex flex-col h-[85vh]">
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-database text-emerald-400"></i> Industrial Visit Manifest
+                </h3>
+                <div class="flex items-center gap-3">
+                    <button onclick="resetBus()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Reset Bus
+                    </button>
+                    <button onclick="closeAdminPanel()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-hidden flex flex-col bg-slate-50">
+                <div class="bg-white border rounded-xl shadow-sm flex-1 overflow-hidden flex flex-col">
+                    <div class="overflow-x-auto flex-1 custom-scroll">
+                        <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+                            <thead class="bg-slate-100 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="p-3 border-b font-bold text-slate-600">Seat</th>
+                                    <th class="p-3 border-b font-bold text-slate-600">Student Name</th>
+                                    <th class="p-3 border-b font-bold text-slate-600">UID</th>
+                                    <th class="p-3 border-b font-bold text-slate-600">Section</th>
+                                    <th class="p-3 border-b font-bold text-slate-600">Contact Number</th>
+                                    <th class="p-3 border-b font-bold text-slate-600">Logged By (Email)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body" class="divide-y divide-slate-100">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Database with the syntax error fixed
         const studentDatabase = {
@@ -185,7 +227,12 @@
             "24BAI70353": { "name": "Chetna", "section": "24AML 7B", "phone": "7477005127" },
             "23BAI70447": { "name": "Manav Sahni", "section": "23AML 4B", "phone": "6397483815" },
             "24BAI70845": { "name": "Akshaj", "section": "24AML 4B", "phone": "7317319091" },
-            "24BAI70262": { "name": "Ishleen", "section": "24AML 6B", "phone": "7719555828" }
+            "24BAI70262": { "name": "Ishleen", "section": "24AML 6B", "phone": "7719555828" },
+            "1": { "name": "Parasdeep", "section": "1", "phone": "0" },
+            "2": { "name": "Prabhjot", "section": "1", "phone": "01" },
+            "3": { "name": "Mehak", "section": "1", "phone": "02" },
+            "4": { "name": "Ankita", "section": "1", "phone": "04" },
+            "5": { "name": "Mukesh", "section": "1", "phone": "05" }
         };
 
         const seats = {};
@@ -383,6 +430,52 @@
             closeModal();
             render();
             setTimeout(() => alert('Booking Confirmed successfully!'), 100);
+        }
+
+        // Admin Panel Logic
+        function openAdminPanel() {
+            const tbody = document.getElementById('admin-table-body');
+            let rows = '';
+            let count = 0;
+
+            for(const id in seats) {
+                if(seats[id].booked) {
+                    count++;
+                    rows += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 border-b font-bold text-slate-800">${id}</td>
+                            <td class="p-3 border-b text-slate-700 capitalize">${seats[id].name}</td>
+                            <td class="p-3 border-b text-emerald-600 font-mono font-semibold">${seats[id].uid}</td>
+                            <td class="p-3 border-b text-slate-700">${seats[id].section}</td>
+                            <td class="p-3 border-b text-slate-700">${seats[id].phone}</td>
+                            <td class="p-3 border-b text-blue-600 text-sm">${seats[id].entryEmail}</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            if(count === 0) {
+                rows = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No seats have been booked yet.</td></tr>`;
+            }
+
+            tbody.innerHTML = rows;
+            document.getElementById('admin-modal').classList.replace('hidden', 'flex');
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-modal').classList.replace('flex', 'hidden');
+        }
+
+        function resetBus() {
+            if(confirm("Are you sure you want to completely RESET all bookings? This action cannot be undone.")) {
+                for(const id in seats) {
+                    seats[id] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+                }
+                selected = [];
+                render();
+                openAdminPanel(); // Refresh admin panel display
+                setTimeout(() => alert('Bus has been successfully reset. All seats are now available.'), 100);
+            }
         }
 
         window.onload = init;
