@@ -434,6 +434,12 @@
 
         // Admin Panel Logic
         function openAdminPanel() {
+            const password = prompt("Please enter the Admin Password:");
+            if (password !== "admin123") {
+                alert("Incorrect password. Access denied.");
+                return;
+            }
+
             const tbody = document.getElementById('admin-table-body');
             let rows = '';
             let count = 0;
