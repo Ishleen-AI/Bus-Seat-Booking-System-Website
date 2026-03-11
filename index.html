@@ -164,8 +164,19 @@
         </div>
     </div>
 
-    <script>
-        
+    <!-- Script updated to use Firebase Modules for Real-time Cloud updates -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Initialize Firebase
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
         const studentDatabase = {
             "24BAI70259": { "name": "Avya Juneja", "section": "24AML2B", "phone": "9056376052" },
             "24BAI70415": { "name": "Heman", "section": "24AML NTPP -2B", "phone": "6355756628" },
@@ -238,20 +249,55 @@
         const seats = {};
         let selected = [];
         let loggedInEmail = "";
+        let currentUser = null;
 
-        function init() {
-            for(let r=1; r<=12; r++) {
-                ['A','B','C','D','E'].forEach(col => {
-                    seats[`${r}${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+        // Initialize local default states
+        for(let r=1; r<=12; r++) {
+            ['A','B','C','D','E'].forEach(col => {
+                seats[`${r}${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+            });
+        }
+        ['A','B','C','D','E','F'].forEach(col => {
+            seats[`13${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+        });
+
+        // Setup Firebase Authentication
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+            }
+        };
+        initAuth();
+
+        // Listen for Real-time database updates from other devices
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                const seatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'bus_seats');
+                onSnapshot(seatsRef, (snapshot) => {
+                    snapshot.forEach(document => {
+                        if(seats[document.id]) {
+                            seats[document.id] = { ...seats[document.id], ...document.data() };
+                        }
+                    });
+                    render();
+                    if (!document.getElementById('admin-modal').classList.contains('hidden')) {
+                        updateAdminTable();
+                    }
+                }, (error) => {
+                    console.error("Error listening to database:", error);
                 });
             }
-            ['A','B','C','D','E','F'].forEach(col => {
-                seats[`13${col}`] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
-            });
-            render();
-        }
+        });
 
-        function grantAccess() {
+        // Exposing functions to the global window object (required since we are now a JS Module)
+        window.grantAccess = function() {
             const emailInput = document.getElementById('access-email').value;
             if(!emailInput || !emailInput.includes('@')) {
                 alert("Please enter a valid email address to continue.");
@@ -263,9 +309,10 @@
             document.getElementById('current-user-email').innerText = loggedInEmail;
             document.getElementById('user-display').classList.remove('hidden');
             document.getElementById('user-display').classList.add('flex');
-        }
+            render();
+        };
 
-        function toggleSeat(id) {
+        window.toggleSeat = function(id) {
             if(seats[id].booked) {
                 alert(`Seat ${id} is already booked!`);
                 return;
@@ -274,7 +321,7 @@
             if(idx > -1) selected.splice(idx, 1);
             else selected.push(id);
             render();
-        }
+        };
 
         function render() {
             const grid = document.getElementById('bus-grid');
@@ -298,7 +345,6 @@
             const s = seats[id];
             const isSel = selected.includes(id);
             
-            // Adjust to flex-col to allow stacking seat ID and student name gracefully
             let cls = "seat relative w-10 h-11 sm:w-12 sm:h-14 rounded-t-xl rounded-b-md border-2 flex flex-col items-center justify-center text-xs sm:text-sm font-bold select-none cursor-pointer overflow-hidden ";
             let title = `Seat ${id}`;
             let cushion = "bg-emerald-100";
@@ -309,7 +355,6 @@
                 title = `Booked by ${s.name}`;
                 cushion = "bg-slate-300";
                 
-                // Get the first name to fit the small box area
                 const firstName = s.name.split(' ')[0];
                 content = `
                     <span class="z-10 text-[9px] sm:text-[10px] leading-none mt-1 sm:mt-0 opacity-70">${id}</span>
@@ -351,7 +396,7 @@
             }
         }
 
-        function checkUID(seatId) {
+        window.checkUID = function(seatId) {
             const uidInput = document.getElementById(`uid-${seatId}`);
             const nameInput = document.getElementById(`name-${seatId}`);
             const statusIcon = document.getElementById(`status-${seatId}`);
@@ -369,9 +414,9 @@
                 if (enteredUID.length > 5) uidInput.classList.add('border-rose-500');
                 else { uidInput.classList.add('border-slate-300'); uidInput.classList.remove('border-rose-500'); }
             }
-        }
+        };
 
-        function openBookingModal() {
+        window.openBookingModal = function() {
             if(selected.length === 0) return;
             document.getElementById('error-message').classList.add('hidden');
             const body = document.getElementById('modal-body');
@@ -397,11 +442,11 @@
                 </div>
             `).join('');
             document.getElementById('modal').classList.replace('hidden', 'flex');
-        }
+        };
 
-        function closeModal() {
+        window.closeModal = function() {
             document.getElementById('modal').classList.replace('flex', 'hidden');
-        }
+        };
 
         function showError(msg) {
             const errDiv = document.getElementById('error-message');
@@ -409,7 +454,8 @@
             errDiv.classList.remove('hidden');
         }
 
-        function processFinalBooking() {
+        // Pushing data to the Cloud Database
+        window.processFinalBooking = async function() {
             const newEntries = [];
             const tempUIDs = new Set();
 
@@ -433,24 +479,42 @@
                 }
             }
 
-            newEntries.forEach(entry => {
-                seats[entry.id] = { booked: true, ...entry, entryEmail: loggedInEmail };
-            });
+            try {
+                const batch = writeBatch(db);
+                newEntries.forEach(entry => {
+                    const seatRef = doc(db, 'artifacts', appId, 'public', 'data', 'bus_seats', entry.id);
+                    batch.set(seatRef, {
+                        booked: true,
+                        name: entry.name,
+                        uid: entry.uid,
+                        section: entry.section,
+                        phone: entry.phone,
+                        entryEmail: loggedInEmail
+                    });
+                });
+                await batch.commit(); // Write to Cloud!
 
-            selected = [];
-            closeModal();
-            render();
-            setTimeout(() => alert('Booking Confirmed successfully!'), 100);
-        }
+                selected = [];
+                closeModal();
+                setTimeout(() => alert('Booking Confirmed successfully!'), 100);
+            } catch (error) {
+                console.error(error);
+                showError("Network error. Could not save your booking.");
+            }
+        };
 
         // Admin Panel Logic
-        function openAdminPanel() {
+        window.openAdminPanel = function() {
             const password = prompt("Please enter the Admin Password:");
             if (password !== "AMRITSAR1234") {
                 alert("Incorrect password. Access denied.");
                 return;
             }
+            updateAdminTable();
+            document.getElementById('admin-modal').classList.replace('hidden', 'flex');
+        };
 
+        function updateAdminTable() {
             const tbody = document.getElementById('admin-table-body');
             let rows = '';
             let count = 0;
@@ -476,26 +540,38 @@
             }
 
             tbody.innerHTML = rows;
-            document.getElementById('admin-modal').classList.replace('hidden', 'flex');
         }
 
-        function closeAdminPanel() {
+        window.closeAdminPanel = function() {
             document.getElementById('admin-modal').classList.replace('flex', 'hidden');
-        }
+        };
 
-        function resetBus() {
+        // Deleting all bookings from Cloud Database
+        window.resetBus = async function() {
             if(confirm("Are you sure you want to completely RESET all bookings? This action cannot be undone.")) {
-                for(const id in seats) {
-                    seats[id] = { booked: false, name: '', uid: '', section: '', phone: '', entryEmail: '' };
+                try {
+                    const batch = writeBatch(db);
+                    for(const id in seats) {
+                        if(seats[id].booked) {
+                            const seatRef = doc(db, 'artifacts', appId, 'public', 'data', 'bus_seats', id);
+                            batch.set(seatRef, {
+                                booked: false, name: '', uid: '', section: '', phone: '', entryEmail: ''
+                            });
+                        }
+                    }
+                    await batch.commit();
+                    
+                    selected = [];
+                    setTimeout(() => alert('Bus has been successfully reset. All seats are now available.'), 100);
+                } catch (error) {
+                    console.error(error);
+                    alert("Failed to reset database connection.");
                 }
-                selected = [];
-                render();
-                openAdminPanel(); // Refresh admin panel display
-                setTimeout(() => alert('Bus has been successfully reset. All seats are now available.'), 100);
             }
-        }
+        };
 
-        window.onload = init;
+        render();
+
     </script>
 </body>
 </html>
