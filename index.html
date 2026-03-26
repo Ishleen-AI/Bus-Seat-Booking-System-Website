@@ -165,37 +165,29 @@
     </div>
 
     <!-- Script updated to use Firebase Modules for Real-time Cloud updates -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+   <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // =====================================================================
-        // 🚨 1. PASTE YOUR FIREBASE CONFIGURATION HERE! 🚨
-        // You can find this in your Firebase Console -> Project Settings -> General
-        // =====================================================================
-        const isCanvasEnv = false;
-        const myLocalConfig = {
-            apiKey: "AIzaSyDqAE5ox3WZ9kb5_MepnBYfv18GHL2-V3E",
-            authDomain: "bus-ee6c5.firebaseapp.com",
-            projectId: "bus-ee6c5",
-            storageBucket: "bus-ee6c5.firebasestorage.app",
-            messagingSenderId: "986433082730",
-            appId: "1:986433082730:web:181d2ae37d538622c68113"
-        };
+// ✅ Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDqAE5ox3WZ9kb5_MepnBYfv18GHL2-V3E",
+  authDomain: "bus-ee6c5.firebaseapp.com",
+  projectId: "bus-ee6c5",
+  storageBucket: "bus-ee6c5.firebasestorage.app",
+  messagingSenderId: "986433082730",
+  appId: "1:986433082730:web:181d2ae37d538622c68113"
+};
 
-        // Determine if we are running in the dynamic Canvas Environment or Locally
-        const isCanvasEnv = typeof __firebase_config !== 'undefined';
-        const firebaseConfig = isCanvasEnv ? JSON.parse(__firebase_config) : myLocalConfig;
+// ✅ Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        // Define your database collection path variable
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'campus-express';
-
+// ✅ Only ONE declaration (FIXED)
+const isCanvasEnv = typeof __firebase_config !== 'undefined';
+const appId = 'campus-express';
         const studentDatabase = {
     "24BAI70635": { name: "Nipun", section: "24AML 10A", phone: "7876663244" },
     "24BAI70316": { name: "Bhavya Rai", section: "24AML 3A", phone: "9463324143" },
@@ -274,17 +266,17 @@
         });
 
         // Setup Firebase Authentication First
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.warn("🚨 Auth Status: Running without user authentication. Since your database rules are public, database syncing will still work successfully!", error.message);
-            }
-        };
+       const initAuth = async () => {
+    try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+            await signInAnonymously(auth);
+        }
+    } catch (error) {
+        console.warn("Auth fallback:", error.message);
+    }
+};
         
         // Wait for Authentication steps to complete before attempting Database Connection
         await initAuth();
