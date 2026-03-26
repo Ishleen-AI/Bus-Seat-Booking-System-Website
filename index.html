@@ -174,6 +174,7 @@
         // 🚨 1. PASTE YOUR FIREBASE CONFIGURATION HERE! 🚨
         // You can find this in your Firebase Console -> Project Settings -> General
         // =====================================================================
+        const isCanvasEnv = false;
         const myLocalConfig = {
             apiKey: "AIzaSyDqAE5ox3WZ9kb5_MepnBYfv18GHL2-V3E",
             authDomain: "bus-ee6c5.firebaseapp.com",
@@ -249,7 +250,7 @@
     "24BAI70033": { name: "Prabhjot Singh", section: "24AML 6B", phone: "7009473784" },
     "24BAI70018": { name: "Harshit Garg", section: "24AML 5A", phone: "9996190898" },
     "24BAI70449": { name: "Tanmay Rana", section: "24AML 9A", phone: "8544746903" },
-    "24BAI70015": { name: "Tanisha", section: "24AIT NTPP 2", phone: "7351431000" }
+    "24BAI70015": { name: "Tanisha", section: "24AIT NTPP 2", phone: "7351431000" },
             "1": { "name": "Parasdeep", "section": "1", "phone": "0" },
             "2": { "name": "Prabhjot", "section": "1", "phone": "01" },
             "3": { "name": "Mehak", "section": "1", "phone": "02" },
@@ -342,7 +343,7 @@
         function render() {
             const grid = document.getElementById('bus-grid');
             let html = '';
-            for(let r=1; r<=12; r++) {
+            for(let r=1; r<=11; r++) {
                 html += `<div class="flex justify-between items-center group relative">
                     <div class="flex gap-2 sm:gap-3">${renderSeat(r+'A')}${renderSeat(r+'B')}</div>
                     <div class="w-8 sm:w-10 text-center text-slate-300 font-black text-sm">${r}</div>
