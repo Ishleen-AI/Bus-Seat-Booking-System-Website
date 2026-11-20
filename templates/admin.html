@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Campus Express AI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-3">
+                <i class="fa-solid fa-shield-halved text-emerald-400 text-2xl"></i>
+                <span>Admin Dashboard</span>
+                <span class="text-xs bg-rose-500 text-white px-2 py-0.5 rounded-full font-semibold shadow-sm">Kochar Tech Manifest</span>
+            </h1>
+            <div class="flex items-center gap-4">
+                <a href="/" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg border border-slate-700 transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Student Portal
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Admin Container -->
+    <main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 flex flex-col gap-6">
+        
+        <!-- Statistics Metrics Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Total Capacity -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Bus Capacity</span>
+                    <i class="fa-solid fa-bus text-slate-400"></i>
+                </div>
+                <div class="text-2xl font-black text-slate-800" id="stat-total-seats">66</div>
+                <div class="text-[11px] text-slate-500 mt-1">Full coach seating</div>
+            </div>
+
+            <!-- Occupied Seats -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-rose-500 uppercase tracking-wider">Occupied</span>
+                    <i class="fa-solid fa-user-check text-rose-500"></i>
+                </div>
+                <div class="text-2xl font-black text-rose-600" id="stat-occupied-seats">0</div>
+                <div class="text-[11px] text-slate-500 mt-1">Confirmed reservations</div>
+            </div>
+
+            <!-- Available Seats -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Available</span>
+                    <i class="fa-solid fa-couch text-emerald-500"></i>
+                </div>
+                <div class="text-2xl font-black text-emerald-600" id="stat-available-seats">66</div>
+                <div class="text-[11px] text-slate-500 mt-1">Open for booking</div>
+            </div>
+
+            <!-- Occupancy Rate -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Occupancy</span>
+                    <i class="fa-solid fa-chart-pie text-blue-500"></i>
+                </div>
+                <div class="text-2xl font-black text-blue-600" id="stat-occupancy-rate">0.0%</div>
+                <div class="text-[11px] text-slate-500 mt-1">Capacity percentage</div>
+            </div>
+
+            <!-- Cancellations -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Cancellations</span>
+                    <i class="fa-solid fa-ban text-amber-500"></i>
+                </div>
+                <div class="text-2xl font-black text-amber-600" id="stat-cancelled-count">0</div>
+                <div class="text-[11px] text-slate-500 mt-1">Released back to pool</div>
+            </div>
+        </div>
+
+        <!-- AI Manifest Summary Banner (Interactive) -->
+        <div id="ai-summary-card" class="hidden bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-xl border border-indigo-900 relative overflow-hidden animate-pop">
+            <div class="absolute -right-8 -bottom-8 text-8xl text-indigo-800/20 font-black select-none pointer-events-none">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="flex items-center justify-between border-b border-indigo-800/80 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-indigo-100 flex items-center gap-2">
+                        ExpressAI Manifest Intelligence Brief
+                        <span class="text-[10px] bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full font-mono">Foundry Analysis</span>
+                    </h3>
+                </div>
+                <button onclick="document.getElementById('ai-summary-card').classList.add('hidden')" class="text-indigo-400 hover:text-white text-xs">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <div id="ai-summary-content" class="text-sm text-indigo-100/90 leading-relaxed">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Manifest Table Container -->
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Table Header Toolbar -->
+            <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/50">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-rose-500"></i> Real-time Passenger Manifest
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Authoritative bookings synchronized from central SQLite database.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button id="generate-ai-btn" onclick="generateAiSummary()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-sparkles text-amber-300"></i> Generate AI Summary
+                    </button>
+                    <button onclick="loadManifest()" class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-2">
+                        <i id="refresh-btn" class="fa-solid fa-rotate-right"></i> Refresh Data
+                    </button>
+                    <button onclick="resetBus()" class="px-3.5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Reset Bus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="flex-1 overflow-x-auto custom-scroll p-6">
+                <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-600 shadow-sm text-xs uppercase tracking-wider">
+                        <tr>
+                            <th class="p-4 border-b font-bold rounded-tl-lg">Seat</th>
+                            <th class="p-4 border-b font-bold">Student Name</th>
+                            <th class="p-4 border-b font-bold">University UID</th>
+                            <th class="p-4 border-b font-bold">Section</th>
+                            <th class="p-4 border-b font-bold">Contact Number</th>
+                            <th class="p-4 border-b font-bold">Logged By (Email)</th>
+                            <th class="p-4 border-b font-bold text-right rounded-tr-lg">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-slate-400">
+                                <i class="fa-solid fa-spinner fa-spin text-xl text-emerald-500 mr-2"></i> Loading passenger manifest...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin JS -->
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
