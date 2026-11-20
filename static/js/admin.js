@@ -5,6 +5,69 @@
 
 let currentBookings = [];
 let currentSummary = {};
+let manifestRefreshInterval;
+
+function showAdminDashboard() {
+    document.getElementById("admin-login").classList.add("hidden");
+    document.getElementById("admin-dashboard").classList.remove("hidden");
+    document.getElementById("admin-dashboard").classList.add("flex");
+    document.getElementById("admin-logout-btn").classList.remove("hidden");
+    loadManifest();
+    if (!manifestRefreshInterval) {
+        manifestRefreshInterval = setInterval(loadManifest, 10000);
+    }
+}
+
+function showAdminLogin() {
+    document.getElementById("admin-dashboard").classList.add("hidden");
+    document.getElementById("admin-dashboard").classList.remove("flex");
+    document.getElementById("admin-login").classList.remove("hidden");
+    document.getElementById("admin-logout-btn").classList.add("hidden");
+    if (manifestRefreshInterval) {
+        clearInterval(manifestRefreshInterval);
+        manifestRefreshInterval = null;
+    }
+}
+
+async function loginAdmin(event) {
+    event.preventDefault();
+    const passwordInput = document.getElementById("admin-password");
+    const error = document.getElementById("admin-login-error");
+    try {
+        const response = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: passwordInput.value })
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            error.textContent = data.error || "Sign-in failed.";
+            error.classList.remove("hidden");
+            passwordInput.select();
+            return;
+        }
+
+        passwordInput.value = "";
+        error.classList.add("hidden");
+        showAdminDashboard();
+    } catch (err) {
+        console.error("Administrator sign-in failed:", err);
+        error.textContent = "Unable to contact the server. Please try again.";
+        error.classList.remove("hidden");
+    }
+}
+
+async function logoutAdmin() {
+    try {
+        const response = await fetch("/api/admin/logout", { method: "POST" });
+        if (!response.ok) {
+            console.error("Administrator sign-out failed.");
+        }
+    } finally {
+        showAdminLogin();
+    }
+}
 
 // Load live manifest data and occupancy stats from Flask backend
 async function loadManifest() {
@@ -15,10 +78,18 @@ async function loadManifest() {
     try {
         // Fetch bookings manifest
         const resBookings = await fetch("/api/bookings");
+        if (resBookings.status === 401) {
+            showAdminLogin();
+            return;
+        }
         const dataBookings = await resBookings.json();
 
         // Fetch occupancy summary
         const resSummary = await fetch("/api/admin/summary");
+        if (resSummary.status === 401) {
+            showAdminLogin();
+            return;
+        }
         const dataSummary = await resSummary.json();
 
         if (dataSummary.success && dataSummary.summary) {
@@ -116,14 +187,11 @@ async function cancelBooking(bookingId, seatNumber, studentName) {
 
 // Reset Entire Bus Manifest
 async function resetBus() {
-    const password = prompt("⚠️ Warning: This will cancel all confirmed bookings and free all 66 seats.\nEnter Admin Password to proceed:");
-    if (!password) return;
+    if (!confirm("⚠️ This will cancel all confirmed bookings and free all 66 seats. Continue?")) return;
 
     try {
         const response = await fetch("/api/admin/reset", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: password })
         });
         const data = await response.json();
 
@@ -206,9 +274,13 @@ window.loadManifest = loadManifest;
 window.cancelBooking = cancelBooking;
 window.resetBus = resetBus;
 window.generateAiSummary = generateAiSummary;
+window.logoutAdmin = logoutAdmin;
 
 // Initial load
 document.addEventListener("DOMContentLoaded", () => {
-    loadManifest();
-    setInterval(loadManifest, 10000);
+    document.getElementById("admin-login-form").addEventListener("submit", loginAdmin);
+    fetch("/api/admin/session")
+        .then(response => response.json())
+        .then(data => data.authenticated ? showAdminDashboard() : showAdminLogin())
+        .catch(() => showAdminLogin());
 });

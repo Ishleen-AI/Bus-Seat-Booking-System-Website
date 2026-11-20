@@ -17,70 +17,13 @@ def get_db_connection() -> sqlite3.Connection:
 
 # Initial seed data for registered students
 PRELOADED_STUDENTS = [
-    {"uid": "24BAI70635", "name": "Nipun", "section": "24AML 10A", "phone": "7876663244"},
-    {"uid": "24BAI70316", "name": "Bhavya Rai", "section": "24AML 3A", "phone": "9463324143"},
-    {"uid": "24BAI70063", "name": "Lagan Jain", "section": "24AML 5A", "phone": "7814394895"},
-    {"uid": "24BAI70168", "name": "Palak Shukla", "section": "24AML 6A", "phone": "7986117486"},
-    {"uid": "24BAI70407", "name": "Tejasvini Sharma", "section": "24AML 8A", "phone": "9654462189"},
-    {"uid": "24BAI70091", "name": "Aklawya Raghuvanshi", "section": "24AML 5B", "phone": "7087158098"},
-    {"uid": "24BAI70810", "name": "Udbhav Vijay", "section": "24AML 4A", "phone": "9929248764"},
-    {"uid": "24BAI70360", "name": "Mayank Jangir", "section": "24AML 7B", "phone": "9001488696"},
-    {"uid": "24BAI70482", "name": "Minahil Hanief Malik", "section": "24AIT NTPP 2B", "phone": "7051620959"},
-    {"uid": "24BAI70772", "name": "Sambhav", "section": "24AML 11A", "phone": "9518624044"},
-    {"uid": "24BAI70766", "name": "Amanpreet Kaur", "section": "24AML 11A", "phone": "8427479046"},
-    {"uid": "24BAI70908", "name": "Nitin", "section": "24AML 12A", "phone": "7404553874"},
-    {"uid": "24BAI70926", "name": "Navya Mahajan", "section": "24AML 12A", "phone": "6284412679"},
-    {"uid": "24BAI70155", "name": "Rasneet Kaur", "section": "24 AML 6A", "phone": "9041833185"},
-    {"uid": "24BAI70038", "name": "Mimanshu Gahlaut", "section": "24AIT KRG G1", "phone": "9138263629"},
-    {"uid": "24BAI70056", "name": "Areen Karan Dev", "section": "24AML 5A", "phone": "9015322030"},
-    {"uid": "24BAI70041", "name": "Sreekesh Das", "section": "24AML 5A", "phone": "9150503296"},
-    {"uid": "24BAI70692", "name": "Shreya Mishra", "section": "24AIT NTPP 2", "phone": "8512022808"},
-    {"uid": "24BAI70632", "name": "Garima", "section": "24AML 4A", "phone": "8847422711"},
-    {"uid": "24BAI70677", "name": "Jatin", "section": "24AML 10B", "phone": "9728453815"},
-    {"uid": "24BAI70624", "name": "Prabhleen Kaur", "section": "24AML 9B", "phone": "9878880513"},
-    {"uid": "24BAI70566", "name": "Yashika Dagar", "section": "24AIT NTPP 2B", "phone": "9289678425"},
-    {"uid": "24BAI70697", "name": "Aryan Dahiya", "section": "24AIT KRG1 G2", "phone": "8708399154"},
-    {"uid": "24BAI70374", "name": "Gagandeep Kaur", "section": "24AML 7B", "phone": "7901711495"},
-    {"uid": "24BAI70380", "name": "Kamal Sharma", "section": "24AIT KRG-G1", "phone": "7015527352"},
-    {"uid": "24BAI70703", "name": "Rahul Jangra", "section": "24AML 10B", "phone": "8571070184"},
-    {"uid": "24BAI70409", "name": "Chakshu Babbar", "section": "24AML 8A", "phone": "9996940323"},
-    {"uid": "24BAI70601", "name": "Tanishka Neelam", "section": "24AML 9 B", "phone": "9010000143"},
-    {"uid": "24BAI70765", "name": "Disha", "section": "24AML 11A", "phone": "7399899000"},
-    {"uid": "24BAI70682", "name": "Riya Maan", "section": "24AML 4A", "phone": "9877112339"},
-    {"uid": "24BAI70271", "name": "Manasvi Sangwan", "section": "24AML 2B", "phone": "9467455357"},
-    {"uid": "24BAI70763", "name": "Harjot Kaur", "section": "24AML 4A", "phone": "8437993799"},
-    {"uid": "24BAI70129", "name": "Manasvi Bajpai", "section": "24AML 5B", "phone": "9335947167"},
-    {"uid": "24BAI70100", "name": "Amit Thakur", "section": "24AML 5B", "phone": "6284191138"},
-    {"uid": "24BAI70028", "name": "Rashi", "section": "24AML 5A", "phone": "9501332844"},
-    {"uid": "24BAI70739", "name": "Muskan", "section": "24AML 10B", "phone": "8708628842"},
-    {"uid": "24BAI70711", "name": "Pulkit Sharma", "section": "24AML 10B", "phone": "7876638821"},
-    {"uid": "24BAI70539", "name": "Purvi Sharma", "section": "24AML 9A", "phone": "8627023088"},
-    {"uid": "24BAI70108", "name": "Vaibhavi Goel", "section": "24AML 5B", "phone": "8266891202"},
-    {"uid": "24BAI70140", "name": "Diksha Garg", "section": "24AML 5B", "phone": "9971082288"},
-    {"uid": "24BAI70488", "name": "Purtika", "section": "24AML 8B", "phone": "9812391341"},
-    {"uid": "23BAI70045", "name": "Shalini Kush", "section": "23AML 8A", "phone": "9667906067"},
-    {"uid": "23BAI70419", "name": "Aman Kumar", "section": "23AML 2B", "phone": "8700873822"},
-    {"uid": "23BAI70393", "name": "Shruti Mittal", "section": "23AML 3A", "phone": "8950904565"},
-    {"uid": "23BAI70447", "name": "Manav Sahni", "section": "23AML 4B", "phone": "6397483815"},
-    {"uid": "23BAI70475", "name": "Suryansh Shandilya", "section": "23AML 9A", "phone": "8118892709"},
-    {"uid": "23BAI70053", "name": "Shivani Thakur", "section": "23AML 7A", "phone": "8544701238"},
-    {"uid": "23BAI70470", "name": "Isha", "section": "23AML 4B", "phone": "9205881610"},
-    {"uid": "23BAI70046", "name": "Gautam Dhiman", "section": "23AML 8A", "phone": "7404460487"},
-    {"uid": "23BAI70430", "name": "Prathamesh Sidana", "section": "23AML 4B", "phone": "9413517372"},
-    {"uid": "24BAI70033", "name": "Prabhjot Singh", "section": "24AML 6B", "phone": "7009473784"},
-    {"uid": "24BAI70018", "name": "Harshit Garg", "section": "24AML 5A", "phone": "9996190898"},
-    {"uid": "24BAI70449", "name": "Tanmay Rana", "section": "24AML 9A", "phone": "8544746903"},
-    {"uid": "24BAI70015", "name": "Tanisha", "section": "24AIT NTPP 2", "phone": "7351431000"},
-    {"uid": "24BAI70262", "name": "Ishleen", "section": "24AML 6B", "phone": "7719555828"},
-    {"uid": "24BAI70259", "name": "Avya Juneja", "section": "24AML 2B", "phone": "9056376052"},
-    {"uid": "24BAI70011", "name": "Bhavishya", "section": "24AML 2A", "phone": "8950793558"},
-    {"uid": "24BAI70186", "name": "Jatin Kumar", "section": "24AML 6A", "phone": "7988585464"},
-    {"uid": "24BAI70647", "name": "Asha", "section": "24AML 10A", "phone": "7696357049"},
-    {"uid": "1", "name": "Parasdeep", "section": "Demo 1", "phone": "9811000001"},
-    {"uid": "2", "name": "Prabhjot", "section": "Demo 1", "phone": "9811000002"},
-    {"uid": "3", "name": "Nishtha", "section": "Demo 1", "phone": "9811000003"},
-    {"uid": "4", "name": "Tanvi", "section": "Demo 1", "phone": "9811000004"},
-    {"uid": "5", "name": "Suresh Kaswan", "section": "Demo 1", "phone": "9811000005"}
+    {
+        "uid": f"DEMO{student_number:04d}",
+        "name": "Demo Student",
+        "section": "Demo",
+        "phone": "",
+    }
+    for student_number in range(1, 65)
 ]
 
 # Generate standard 66 seats layout
@@ -180,10 +123,10 @@ def init_db(seed_sample_bookings: bool = True):
     cursor.execute("SELECT COUNT(*) FROM bookings WHERE booking_status = 'confirmed'")
     if seed_sample_bookings and cursor.fetchone()[0] == 0:
         sample_bookings = [
-            {"seat": "1A", "uid": "24BAI70259", "email": "admin@university.edu"},
-            {"seat": "1B", "uid": "24BAI70011", "email": "rep1@university.edu"},
-            {"seat": "3C", "uid": "24BAI70186", "email": "admin@university.edu"},
-            {"seat": "13F", "uid": "24BAI70647", "email": "rep2@university.edu"}
+            {"seat": "1A", "uid": "DEMO0061", "email": "admin@example.invalid"},
+            {"seat": "1B", "uid": "DEMO0062", "email": "rep1@example.invalid"},
+            {"seat": "3C", "uid": "DEMO0063", "email": "admin@example.invalid"},
+            {"seat": "13F", "uid": "DEMO0064", "email": "rep2@example.invalid"}
         ]
         for b in sample_bookings:
             try:

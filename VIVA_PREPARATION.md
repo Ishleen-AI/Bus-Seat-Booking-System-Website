@@ -19,7 +19,7 @@ Follow this step-by-step sequence to deliver a high-scoring demonstration to you
 3. Point out the **66-seat bus layout** (Rows 1–12 with 5 seats each, plus Back Row 13 with 6 seats).
 4. Click on an available green seat (e.g., `2A`). Notice it turns rose and appears in the right Booking Summary card.
 5. Click **"Proceed to Book"**.
-6. Enter an authorized student UID (e.g., `24BAI70262`). Show how the student name (*Ishleen*) auto-populates from the database.
+6. Enter an authorized student UID (e.g., `DEMO0001`). Show how the student name (*Demo Student*) auto-populates from the database.
 7. Click **"Confirm Reservation"**. Show the instant confirmation alert and that Seat `2A` now shows as booked in slate gray.
 
 ### Step 3: Introducing ExpressAI & Demonstrating Tool Calling (1.5 minutes)
@@ -44,7 +44,7 @@ Follow this step-by-step sequence to deliver a high-scoring demonstration to you
 2. Point out the live KPI metrics: Total Capacity (66), Occupied, Available, Occupancy %, and Cancellations.
 3. Show the passenger manifest with the newly booked seat.
 4. Click **"Generate AI Summary"**. Show the AI-generated executive operational overview for tour coordinators.
-5. Demonstrate single-click cancellation or the password-protected **"Reset Bus"** button (`AMRITSAR1234`).
+5. Demonstrate single-click cancellation or the administrator-session protected **"Reset Bus"** button.
 
 ---
 
@@ -134,4 +134,4 @@ Follow this step-by-step sequence to deliver a high-scoring demonstration to you
 | **AI Platform** | Microsoft Foundry / Azure OpenAI Service (`gpt-4o-mini`) |
 | **AI Tool Schema** | 5 tool definitions (Available seats, Capacity, Seat check, Rules, UID lookup) |
 | **Test Coverage** | 20 Automated Tests across DB, API, and AI modules (`pytest`) |
-| **Admin Password** | `AMRITSAR1234` |
+| **Admin Password** | Configured privately through `ADMIN_PASSWORD` |

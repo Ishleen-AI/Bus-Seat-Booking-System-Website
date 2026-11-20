@@ -1,5 +1,7 @@
 import os
-from flask import Flask, render_template, request, jsonify, send_from_directory
+import hmac
+from functools import wraps
+from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 from config import Config
 import database
@@ -9,9 +11,20 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config.from_object(Config)
 CORS(app)
 
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapped(*args, **kwargs):
+        if not session.get("admin_authenticated"):
+            return jsonify({"success": False, "error": "Administrator sign-in required."}), 401
+        return view_func(*args, **kwargs)
+
+    return wrapped
+
+
 # Ensure database is initialized on startup
 with app.app_context():
-    database.init_db(seed_sample_bookings=True)
+    database.init_db(seed_sample_bookings=not Config.IS_APP_SERVICE)
 
 # ----------------------------------------------------
 # Frontend Page Routes
@@ -41,7 +54,10 @@ def get_seats():
             "success": True,
             "total_seats": len(seats),
             "available_count": available_info["count"],
-            "seats": seats
+            "seats": [
+                {"seat_number": seat["seat_number"], "booked": seat["booked"]}
+                for seat in seats
+            ]
         }), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -87,6 +103,7 @@ def verify_student(uid):
 # ----------------------------------------------------
 
 @app.route("/api/bookings", methods=["GET"])
+@admin_required
 def get_bookings():
     """Retrieves all active passenger reservations for the admin manifest."""
     try:
@@ -103,7 +120,7 @@ def get_bookings():
 def create_reservation():
     """
     Creates a new bus reservation.
-    Supports single reservation: { "seat_number": "1C", "uid": "24BAI70262", "email": "..." }
+    Supports single reservation: { "seat_number": "1C", "uid": "DEMO0001", "email": "..." }
     Or batch reservations: { "bookings": [ { "seat_number": "1C", "uid": "..." }, ... ] }
     """
     try:
@@ -147,13 +164,17 @@ def create_reservation():
         return jsonify({
             "success": True,
             "message": f"Successfully confirmed {len(created)} seat reservation(s).",
-            "bookings": created
+            "bookings": [
+                {"booking_id": booking["booking_id"], "seat_number": booking["seat_number"]}
+                for booking in created
+            ]
         }), 201
 
     except Exception as e:
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 @app.route("/api/bookings/<int:booking_id>", methods=["DELETE"])
+@admin_required
 def cancel_reservation(booking_id):
     """Cancels a confirmed reservation and frees the seat."""
     try:
@@ -165,14 +186,10 @@ def cancel_reservation(booking_id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/admin/reset", methods=["POST"])
+@admin_required
 def reset_bus_reservations():
-    """Resets all bus bookings. Requires admin password."""
+    """Resets all bus bookings for an authenticated administrator."""
     try:
-        data = request.get_json(silent=True) or {}
-        password = data.get("password", "")
-        if password != Config.ADMIN_PASSWORD:
-            return jsonify({"success": False, "error": "Invalid administrator password. Access denied."}), 403
-
         success, msg, count = database.reset_all_bookings()
         if not success:
             return jsonify({"success": False, "error": msg}), 500
@@ -185,6 +202,7 @@ def reset_bus_reservations():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/admin/summary", methods=["GET"])
+@admin_required
 def get_admin_summary():
     """Retrieves bus occupancy analytics and section breakdown."""
     try:
@@ -194,6 +212,7 @@ def get_admin_summary():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/admin/ai-summary", methods=["POST"])
+@admin_required
 def get_admin_ai_summary():
     """Generates an AI-driven operational summary of the bus manifest."""
     try:
@@ -207,6 +226,31 @@ def get_admin_ai_summary():
         }), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/admin/session", methods=["GET"])
+def get_admin_session():
+    return jsonify({"authenticated": bool(session.get("admin_authenticated"))}), 200
+
+
+@app.route("/api/admin/login", methods=["POST"])
+def admin_login():
+    data = request.get_json(silent=True)
+    password = data.get("password", "") if isinstance(data, dict) else ""
+    if not isinstance(password, str) or not hmac.compare_digest(password, Config.ADMIN_PASSWORD):
+        return jsonify({"success": False, "error": "Invalid administrator password."}), 401
+
+    session.clear()
+    session["admin_authenticated"] = True
+    return jsonify({"success": True}), 200
+
+
+@app.route("/api/admin/logout", methods=["POST"])
+@admin_required
+def admin_logout():
+    session.clear()
+    return jsonify({"success": True}), 200
+
 
 # ----------------------------------------------------
 # REST API: ExpressAI Assistant
@@ -249,8 +293,9 @@ if __name__ == "__main__":
     print(" 🚍 Campus Express AI - Bus Reservation & Assistant ")
     print(" Microsoft AI-901 Certified Working Prototype")
     print("=====================================================")
-    print(" Server running at: http://127.0.0.1:5000")
-    print(" Admin Portal at:   http://127.0.0.1:5000/admin")
-    print(" ExpressAI Chat at: http://127.0.0.1:5000/api/ai/chat")
+    port = int(os.getenv("PORT", "5000"))
+    print(f" Server running on port: {port}")
+    print(f" Admin Portal at:         http://127.0.0.1:{port}/admin")
+    print(f" ExpressAI Chat at:       http://127.0.0.1:{port}/api/ai/chat")
     print("=====================================================")
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)

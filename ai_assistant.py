@@ -86,7 +86,7 @@ AI_TOOLS = [
                 "properties": {
                     "uid": {
                         "type": "string",
-                        "description": "The student's university UID, e.g., '24BAI70262'"
+                        "description": "The student's university UID, e.g., 'DEMO0001'"
                     }
                 },
                 "required": ["uid"]
@@ -146,9 +146,7 @@ def execute_tool(tool_name: str, arguments: Dict[str, Any]) -> str:
                 return json.dumps({"found": False, "message": f"No active confirmed booking found for UID '{uid}'."})
             return json.dumps({
                 "found": True,
-                "student_name": booking["student_name"],
                 "seat_number": booking["seat_number"],
-                "section": booking["section"],
                 "booking_date": booking["booking_date"]
             })
 
@@ -397,7 +395,7 @@ def _generate_grounded_fallback_response(query: str) -> Dict[str, Any]:
                 "status": "success"
             }
 
-    # 4. UID Booking lookup (e.g. "Check booking for 24BAI70262")
+    # 4. UID Booking lookup (e.g. "Check booking for DEMO0001")
     uid_match = re.search(r'\b(2[34]BAI\d{5}|\d{1,2})\b', query, re.IGNORECASE)
     if uid_match and ("my" in q or "booking" in q or "check" in q or "status" in q):
         uid_val = uid_match.group(0).upper()
@@ -431,7 +429,7 @@ def _generate_grounded_fallback_response(query: str) -> Dict[str, Any]:
                         "1. **Select Seat**: Click on any available green seat in the interactive bus layout.\n"
                         "2. **View Summary**: Check your chosen seat in the 'Booking Summary' card on the right.\n"
                         "3. **Proceed to Book**: Click the **'Proceed to Book'** button.\n"
-                        "4. **Enter UID**: Type your University UID (e.g., `24BAI70262`). The system will verify the authorized list and auto-fill your name.\n"
+                        "4. **Enter UID**: Type your University UID (e.g., `DEMO0001`). The system will verify the authorized list and auto-fill your name.\n"
                         "5. **Confirm**: Click the green **'Confirm'** button. Your booking is atomically verified and saved in the database!",
             "tools_used": [],
             "model": "ExpressAI Grounded Engine",

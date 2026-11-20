@@ -254,7 +254,7 @@ Implemented a dual-engine architecture: If cloud API credentials or connectivity
 - **Privacy & PII**: ExpressAI detects requests for student phone numbers or personal information and returns an explicit Responsible AI notice.
 - **Authorization**: University UID verification against the authorized visit roster.
 - **Credential Protection**: API keys and database paths are isolated in `.env` and excluded via `.gitignore`.
-- **Admin Authentication**: Bus reset endpoint protected with password verification (`AMRITSAR1234`).
+- **Admin Authentication**: Booking manifest and management endpoints protected by an administrator session.
 
 ---
 
@@ -268,7 +268,7 @@ Automated testing was conducted using `pytest` across all three application laye
 tests/test_database.py:
   ✓ test_database_initialization: Confirms 66 total seats and default metrics.
   ✓ test_get_all_seats: Validates full 66-seat collection including Row 13 (A-F).
-  ✓ test_student_lookup: Confirms student UID lookup (Ishleen - 24BAI70262).
+  ✓ test_student_lookup: Confirms student UID lookup (Demo Student - DEMO0001).
   ✓ test_create_booking_and_double_booking_prevention: Tests atomic reservation, duplicate seat prevention, single seat per student enforcement, and cancellation.
 
 tests/test_booking.py:

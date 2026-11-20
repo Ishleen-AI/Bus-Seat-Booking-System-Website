@@ -19,10 +19,10 @@ def test_get_all_seats():
 
 def test_student_lookup():
     # Test preloaded student
-    student = database.get_student_by_uid("24BAI70262") # Ishleen
+    student = database.get_student_by_uid("DEMO0001") # Demo Student
     assert student is not None
-    assert student["student_name"] == "Ishleen"
-    assert student["section"] == "24AML 6B"
+    assert student["student_name"] == "Demo Student"
+    assert student["section"] == "Demo"
 
 def test_create_booking_and_double_booking_prevention():
     # Find an available seat
@@ -30,20 +30,20 @@ def test_create_booking_and_double_booking_prevention():
     assert available_info["count"] > 0
     target_seat = available_info["available_seats"][0]
 
-    # Use Ishleen for booking
-    uid = "24BAI70262"
-    success, msg, booking = database.create_booking(target_seat, uid, "ishleen@university.edu")
+    # Use Demo Student for booking
+    uid = "DEMO0001"
+    success, msg, booking = database.create_booking(target_seat, uid, "student@example.invalid")
     assert success is True
     assert booking["seat_number"] == target_seat
 
     # Attempt to book the same seat with another student
-    success2, msg2, _ = database.create_booking(target_seat, "24BAI70018", "harshit@university.edu")
+    success2, msg2, _ = database.create_booking(target_seat, "DEMO0053", "student@example.invalid")
     assert success2 is False
     assert "already been booked" in msg2.lower()
 
     # Attempt to book another seat with the same student (1 seat per student rule)
     other_seat = available_info["available_seats"][1]
-    success3, msg3, _ = database.create_booking(other_seat, uid, "ishleen@university.edu")
+    success3, msg3, _ = database.create_booking(other_seat, uid, "student@example.invalid")
     assert success3 is False
     assert "already holds a confirmed booking" in msg3.lower()
 

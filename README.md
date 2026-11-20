@@ -96,7 +96,7 @@ graph TD
 - **Real-Time Stat Counters**: Bus Capacity (66), Occupied Seats, Available Seats, Occupancy Rate %, and Cancellations.
 - **Single-Click Cancellation**: Individual seat release with instant status updates.
 - **AI-Assisted Operational Brief**: Generates an intelligent executive summary for faculty and tour coordinators.
-- **Protected Bus Reset**: Password-protected (`AMRITSAR1234`) one-click reset for next journeys.
+- **Protected Bus Reset**: Administrator-session protected one-click reset for next journeys.
 
 ---
 
@@ -167,11 +167,14 @@ pip install -r requirements.txt
 ### Step 4: Configure Microsoft Foundry Credentials (Optional)
 The system includes an **Intelligent Offline Grounding Engine** that functions 100% out of the box even without cloud credentials. To connect directly to your live Microsoft Foundry deployment, edit `.env`:
 ```env
+SECRET_KEY=generate-a-random-value-at-least-32-characters
+ADMIN_PASSWORD=choose-a-unique-password-at-least-16-characters
 AZURE_OPENAI_API_KEY=your_azure_foundry_api_key
 AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
 AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
 AZURE_OPENAI_API_VERSION=2024-08-01-preview
 ```
+Keep `.env` private and never commit real secrets. The public admin dashboard requires the `ADMIN_PASSWORD` configured in the environment.
 
 ### Step 5: Run Automated Tests
 Verify all database, booking API, and AI assistant test cases:
@@ -185,9 +188,24 @@ python -m pytest tests/
 python app.py
 ```
 
+### Azure App Service (Linux)
+
+Use the Python runtime, install dependencies from `requirements.txt`, and set the startup command:
+```sh
+gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app
+```
+
+Configure these App Service environment settings:
+- `SECRET_KEY`: random value of at least 32 characters.
+- `ADMIN_PASSWORD`: unique value of at least 16 characters.
+- `DATABASE_PATH`: `/home/campus-express.db` for persistent SQLite storage.
+- `SCM_DO_BUILD_DURING_DEPLOYMENT`: `true`.
+
+The app refuses to start on App Service if the required security settings are missing or too short. Use Azure App Settings for secrets; do not commit them to the repository.
+
 ### Step 7: Open in Browser
 - **Student Booking Portal**: [http://127.0.0.1:5000](http://127.0.0.1:5000)
-- **Admin Dashboard**: [http://127.0.0.1:5000/admin](http://127.0.0.1:5000/admin) *(Admin Password: `AMRITSAR1234`)*
+- **Admin Dashboard**: [http://127.0.0.1:5000/admin](http://127.0.0.1:5000/admin) *(sign in with the configured administrator password)*
 
 ---
 

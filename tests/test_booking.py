@@ -19,11 +19,11 @@ def test_api_seats(client):
     assert len(data["seats"]) == 66
 
 def test_verify_student_valid(client):
-    response = client.get("/api/students/verify/24BAI70262") # Ishleen
+    response = client.get("/api/students/verify/DEMO0001") # Demo Student
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
-    assert data["student"]["student_name"] == "Ishleen"
+    assert data["student"]["student_name"] == "Demo Student"
 
 def test_verify_student_invalid(client):
     response = client.get("/api/students/verify/FAKEUID123")
@@ -39,11 +39,11 @@ def test_booking_workflow(client):
     assert len(available_seats) > 0
     test_seat = available_seats[0]
 
-    # 2. Book seat with student Nipun (24BAI70635)
+    # 2. Book seat with student Demo Student (DEMO0002)
     booking_res = client.post("/api/bookings", json={
         "seat_number": test_seat,
-        "uid": "24BAI70635",
-        "email": "nipun@university.edu"
+        "uid": "DEMO0002",
+        "email": "student@example.invalid"
     })
     assert booking_res.status_code == 201
     booking_data = booking_res.get_json()
@@ -54,8 +54,8 @@ def test_booking_workflow(client):
     # 3. Prevent duplicate booking of same seat
     dup_res = client.post("/api/bookings", json={
         "seat_number": test_seat,
-        "uid": "24BAI70316",
-        "email": "bhavya@university.edu"
+        "uid": "DEMO0003",
+        "email": "student@example.invalid"
     })
     assert dup_res.status_code == 409
     assert dup_res.get_json()["success"] is False
@@ -64,18 +64,22 @@ def test_booking_workflow(client):
     other_seat = available_seats[1]
     student_dup_res = client.post("/api/bookings", json={
         "seat_number": other_seat,
-        "uid": "24BAI70635",
-        "email": "nipun@university.edu"
+        "uid": "DEMO0002",
+        "email": "student@example.invalid"
     })
     assert student_dup_res.status_code == 409
     assert student_dup_res.get_json()["success"] is False
 
     # 5. Cancel reservation
+    login_res = client.post("/api/admin/login", json={"password": app.config["ADMIN_PASSWORD"]})
+    assert login_res.status_code == 200
     del_res = client.delete(f"/api/bookings/{booking_id}")
     assert del_res.status_code == 200
     assert del_res.get_json()["success"] is True
 
 def test_admin_summary_api(client):
+    login_res = client.post("/api/admin/login", json={"password": app.config["ADMIN_PASSWORD"]})
+    assert login_res.status_code == 200
     res = client.get("/api/admin/summary")
     assert res.status_code == 200
     data = res.get_json()
@@ -93,17 +97,56 @@ def test_template_routes(client):
     assert b"Admin Dashboard" in res_admin.data
 
 def test_admin_reset_security(client):
-    # Invalid password
-    bad_res = client.post("/api/admin/reset", json={"password": "WRONG_PASSWORD"})
-    assert bad_res.status_code == 403
+    # Admin routes require a successful sign-in.
+    unauthenticated_res = client.post("/api/admin/reset", json={})
+    assert unauthenticated_res.status_code == 401
+
+    bad_res = client.post("/api/admin/login", json={"password": "WRONG_PASSWORD"})
+    assert bad_res.status_code == 401
     assert bad_res.get_json()["success"] is False
 
-    # Valid password
-    good_res = client.post("/api/admin/reset", json={"password": "AMRITSAR1234"})
+    good_res = client.post("/api/admin/login", json={"password": app.config["ADMIN_PASSWORD"]})
     assert good_res.status_code == 200
-    assert good_res.get_json()["success"] is True
+    reset_res = client.post("/api/admin/reset", json={})
+    assert reset_res.status_code == 200
+    assert reset_res.get_json()["success"] is True
+
+
+def test_admin_manifest_requires_login(client):
+    assert client.get("/api/bookings").status_code == 401
+    assert client.get("/api/admin/summary").status_code == 401
+    assert client.post("/api/admin/ai-summary").status_code == 401
+    assert client.delete("/api/bookings/1").status_code == 401
+
+
+def test_public_responses_omit_student_details(client):
+    database.reset_all_bookings()
+    response = client.get("/api/seats")
+    assert response.status_code == 200
+    seats = response.get_json()["seats"]
+    assert all(set(seat) == {"seat_number", "booked"} for seat in seats)
+    available_seat = next(seat["seat_number"] for seat in seats if not seat["booked"])
+
+    booking = client.post("/api/bookings", json={
+        "seat_number": available_seat,
+        "uid": "DEMO0064",
+        "email": "student@example.invalid"
+    })
+    assert booking.status_code == 201
+    assert set(booking.get_json()["bookings"][0]) == {"booking_id", "seat_number"}
+
+
+def test_admin_session_logout(client):
+    login = client.post("/api/admin/login", json={"password": app.config["ADMIN_PASSWORD"]})
+    assert login.status_code == 200
+    assert client.get("/api/admin/session").get_json()["authenticated"] is True
+    assert client.post("/api/admin/logout").status_code == 200
+    assert client.get("/api/admin/session").get_json()["authenticated"] is False
+    assert client.get("/api/bookings").status_code == 401
 
 def test_admin_ai_summary_endpoint(client):
+    login_res = client.post("/api/admin/login", json={"password": app.config["ADMIN_PASSWORD"]})
+    assert login_res.status_code == 200
     res = client.post("/api/admin/ai-summary")
     assert res.status_code == 200
     data = res.get_json()

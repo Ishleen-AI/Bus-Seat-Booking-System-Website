@@ -7,9 +7,13 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "campus_express_ai_default_secret_key")
+    IS_APP_SERVICE = bool(os.getenv("WEBSITE_SITE_NAME"))
+    SECRET_KEY = os.getenv("SECRET_KEY") or "local-development-only-secret"
     DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "database" / "campus_express.db"))
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "AMRITSAR1234")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD") or "local-development-only-password"
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = IS_APP_SERVICE
     
     # Microsoft Foundry / Azure OpenAI Configuration
     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
@@ -33,3 +37,12 @@ class Config:
     def is_openai_configured(cls) -> bool:
         """Returns True if standard OpenAI API key is provided."""
         return bool(cls.OPENAI_API_KEY)
+
+
+if Config.IS_APP_SERVICE and (
+    len(os.getenv("SECRET_KEY", "")) < 32
+    or len(os.getenv("ADMIN_PASSWORD", "")) < 16
+):
+    raise RuntimeError(
+        "App Service requires SECRET_KEY (32+ characters) and ADMIN_PASSWORD (16+ characters)."
+    )

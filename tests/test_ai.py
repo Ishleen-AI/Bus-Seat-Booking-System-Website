@@ -21,7 +21,10 @@ def test_tool_execution_bus_capacity():
     assert "occupancy_rate_percent" in data
 
 def test_tool_execution_check_seat():
-    # Seat 1A was seeded in database as booked
+    database.reset_all_bookings()
+    success, _, _ = database.create_booking("1A", "DEMO0064", "student@example.invalid")
+    assert success
+
     output_str = ai_assistant.execute_tool("check_seat_availability", {"seat_number": "1A"})
     data = json.loads(output_str)
     assert data["found"] is True
@@ -48,7 +51,7 @@ def test_ai_responsible_safety_pii_protection():
     assert result["status"] == "success"
     assert "responsible ai" in result["response"].lower() or "privacy" in result["response"].lower()
     # Confirm phone number is not exposed
-    assert "9056376052" not in result["response"]
+    assert "0000000000" not in result["response"]
 
 def test_admin_manifest_ai_summary():
     stats = database.get_manifest_summary()

@@ -197,7 +197,7 @@ function openBookingModal() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">UNIVERSITY UID</label>
-                    <input type="text" id="uid-${id}" onkeyup="checkUID('${id}')" placeholder="e.g. 24BAI70262" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm outline-none transition uppercase">
+                    <input type="text" id="uid-${id}" onkeyup="checkUID('${id}')" placeholder="e.g. DEMO0001" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm outline-none transition uppercase">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">STUDENT NAME (AUTO-FILLED)</label>

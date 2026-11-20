@@ -31,7 +31,7 @@
 
     <main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 flex flex-col">
         <div class="bg-white border border-gray-200 rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden">
-            
+
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h2 class="text-lg font-bold text-gray-800">
                     <i class="fa-solid fa-list-check text-rose-500 mr-2"></i> Real-time Passenger Manifest
@@ -63,16 +63,16 @@
     </main>
 
     <script>
-        // NOTE: Because this is a separate local HTML file with no backend server, 
+        // NOTE: Because this is a separate local HTML file with no backend server,
         // it cannot automatically read the bookings made on the index.html page.
         // I have added mock data below so you can see how the layout looks!
         // To make this fully functional, you will need a cloud database.
 
         const mockBookings = [
-            { id: "1A", name: "Avya Juneja", uid: "24BAI70259", section: "24AML2B", phone: "9056376052", entryEmail: "admin@university.edu" },
-            { id: "1B", name: "Bhavishya", uid: "24BAI70011", section: "24AML-2A", phone: "8950793558", entryEmail: "rep1@university.edu" },
-            { id: "3C", name: "Jatin Kumar", uid: "24BAI70186", section: "24AML 6A", phone: "7988585464", entryEmail: "admin@university.edu" },
-            { id: "13F", name: "Asha", uid: "24BAI70647", section: "24AML-10A", phone: "7696357049", entryEmail: "rep2@university.edu" }
+            { id: "1A", name: "Demo Student", uid: "DEMO0061", section: "Demo", phone: "", entryEmail: "demo@example.invalid" },
+            { id: "1B", name: "Demo Student", uid: "DEMO0062", section: "Demo", phone: "", entryEmail: "demo@example.invalid" },
+            { id: "3C", name: "Demo Student", uid: "DEMO0063", section: "Demo", phone: "", entryEmail: "demo@example.invalid" },
+            { id: "13F", name: "Demo Student", uid: "DEMO0064", section: "Demo", phone: "", entryEmail: "demo@example.invalid" }
         ];
 
         function loadManifest() {

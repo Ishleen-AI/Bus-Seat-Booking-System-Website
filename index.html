@@ -44,7 +44,7 @@
     </header>
 
     <main class="max-w-6xl mx-auto p-4 md:p-8 flex flex-col lg:flex-row gap-8 h-[calc(100vh-76px)] overflow-y-auto custom-scroll">
-        
+
         <!-- Left Column: The Bus -->
         <div class="flex-1 flex flex-col items-center">
             <div class="w-full max-w-md bg-white p-4 rounded-xl shadow-sm mb-6 flex justify-around text-sm border font-semibold text-slate-600">
@@ -69,7 +69,7 @@
         <div class="lg:w-80 shrink-0">
             <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 sticky top-4">
                 <h2 class="text-lg font-bold border-b pb-3 mb-4 text-slate-800">Booking Summary</h2>
-                
+
                 <div id="cart-empty" class="text-center py-10 text-slate-400">
                     <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
                         <i class="fa-solid fa-couch text-2xl text-slate-300"></i>
@@ -139,7 +139,7 @@
                     <button onclick="closeAdminPanel()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
             </div>
-            
+
             <div class="p-6 flex-1 overflow-hidden flex flex-col bg-slate-50">
                 <div class="bg-white border rounded-xl shadow-sm flex-1 overflow-hidden flex flex-col">
                     <div class="overflow-x-auto flex-1 custom-scroll">
@@ -189,61 +189,61 @@ const db = getFirestore(app);
 const isCanvasEnv = typeof __firebase_config !== 'undefined';
 const appId = 'campus-express';
         const studentDatabase = {
-    "24BAI70635": { name: "Nipun", section: "24AML 10A", phone: "7876663244" },
-    "24BAI70316": { name: "Bhavya Rai", section: "24AML 3A", phone: "9463324143" },
-    "24BAI70063": { name: "Lagan Jain", section: "24AML 5A", phone: "7814394895" },
-    "24BAI70168": { name: "Palak Shukla", section: "24AML 6A", phone: "7986117486" },
-    "24BAI70407": { name: "Tejasvini Sharma", section: "24AML 8A", phone: "9654462189" },
-    "24BAI70091": { name: "Aklawya Raghuvanshi", section: "24AML 5B", phone: "7087158098" },
-    "24BAI70810": { name: "Udbhav Vijay", section: "24AML 4A", phone: "9929248764" },
-    "24BAI70360": { name: "Mayank Jangir", section: "24AML 7B", phone: "9001488696" },
-    "24BAI70482": { name: "Minahil Hanief Malik", section: "24AIT NTPP 2B", phone: "7051620959" },
-    "24BAI70772": { name: "Sambhav", section: "24AML 11A", phone: "9518624044" },
-    "24BAI70766": { name: "Amanpreet Kaur", section: "24AML 11A", phone: "8427479046" },
-    "24BAI70908": { name: "Nitin", section: "24AML 12A", phone: "7404553874" },
-    "24BAI70926": { name: "Navya Mahajan", section: "24AML 12A", phone: "6284412679" },
-    "24BAI70155": { name: "Rasneet Kaur", section: "24 AML 6A", phone: "9041833185" },
-    "24BAI70038": { name: "Mimanshu Gahlaut", section: "24AIT KRG G1", phone: "9138263629" },
-    "24BAI70056": { name: "Areen Karan Dev", section: "24AML 5A", phone: "9015322030" },
-    "24BAI70041": { name: "Sreekesh Das", section: "24AML 5A", phone: "9150503296" },
-    "24BAI70692": { name: "Shreya Mishra", section: "24AIT NTPP 2", phone: "8512022808" },
-    "24BAI70632": { name: "Garima", section: "24AML 4A", phone: "8847422711" },
-    "24BAI70677": { name: "Jatin", section: "24AML 10B", phone: "9728453815" },
-    "24BAI70624": { name: "Prabhleen Kaur", section: "24AML 9B", phone: "9878880513" },
-    "24BAI70566": { name: "Yashika Dagar", section: "24AIT NTPP 2B", phone: "9289678425" },
-    "24BAI70697": { name: "Aryan Dahiya", section: "24AIT KRG1 G2", phone: "8708399154" },
-    "24BAI70374": { name: "Gagandeep Kaur", section: "24AML 7B", phone: "7901711495" },
-    "24BAI70380": { name: "Kamal Sharma", section: "24AIT KRG-G1", phone: "7015527352" },
-    "24BAI70703": { name: "Rahul Jangra", section: "24AML 10B", phone: "8571070184" },
-    "24BAI70409": { name: "Chakshu Babbar", section: "24AML 8A", phone: "9996940323" },
-    "24BAI70601": { name: "Tanishka Neelam", section: "24AML 9 B", phone: "9010000143" },
-    "24BAI70765": { name: "Disha", section: "24AML 11A", phone: "7399899000" },
-    "24BAI70682": { name: "Riya Maan", section: "24AML 4A", phone: "9877112339" },
-    "24BAI70271": { name: "Manasvi Sangwan", section: "24AML 2B", phone: "9467455357" },
-    "24BAI70763": { name: "Harjot Kaur", section: "24AML 4A", phone: "8437993799" },
-    "24BAI70129": { name: "Manasvi Bajpai", section: "24AML 5B", phone: "9335947167" },
-    "24BAI70100": { name: "Amit Thakur", section: "24AML 5B", phone: "6284191138" },
-    "24BAI70028": { name: "Rashi", section: "24AML 5A", phone: "9501332844" },
-    "24BAI70739": { name: "Muskan", section: "24AML 10B", phone: "8708628842" },
-    "24BAI70711": { name: "Pulkit Sharma", section: "24AML 10B", phone: "7876638821" },
-    "24BAI70539": { name: "Purvi Sharma", section: "24AML 9A", phone: "8627023088" },
-    "24BAI70108": { name: "Vaibhavi Goel", section: "24AML 5B", phone: "8266891202" },
-    "24BAI70140": { name: "Diksha Garg", section: "24AML 5B", phone: "9971082288" },
-    "24BAI70488": { name: "Purtika", section: "24AML 8B", phone: "9812391341" },
-    "23BAI70045": { name: "Shalini Kush", section: "23AML 8A", phone: "9667906067" },
-    "23BAI70419": { name: "Aman Kumar", section: "23AML 2B", phone: "8700873822" },
-    "23BAI70393": { name: "Shruti Mittal", section: "23AML 3A", phone: "8950904565" },
-    "23BAI70447": { name: "Manav Sahni", section: "23AML 4B", phone: "6397483815" },
-    "23BAI70475": { name: "Suryansh Shandilya", section: "23AML 9A", phone: "8118892709" },
-    "23BAI70053": { name: "Shivani Thakur", section: "23AML 7A", phone: "8544701238" },
-    "23BAI70470": { name: "Isha", section: "23AML 4B", phone: "9205881610" },
-    "23BAI70046": { name: "Gautam Dhiman", section: "23AML 8A", phone: "7404460487" },
-    "23BAI70430": { name: "Prathamesh Sidana", section: "23AML 4B", phone: "9413517372" },
-    "24BAI70033": { name: "Prabhjot Singh", section: "24AML 6B", phone: "7009473784" },
-    "24BAI70018": { name: "Harshit Garg", section: "24AML 5A", phone: "9996190898" },
-    "24BAI70449": { name: "Tanmay Rana", section: "24AML 9A", phone: "8544746903" },
-    "24BAI70015": { name: "Tanisha", section: "24AIT NTPP 2", phone: "7351431000" },
-    "24BAI70262": { name: "Ishleen", section: "24AML 6B", phone: "7719555828" },
+    "DEMO0001": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0002": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0003": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0004": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0005": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0006": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0007": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0008": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0009": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0010": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0011": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0012": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0013": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0014": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0015": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0016": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0017": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0018": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0019": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0020": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0021": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0022": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0023": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0024": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0025": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0026": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0027": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0028": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0029": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0030": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0031": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0032": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0033": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0034": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0035": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0036": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0037": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0038": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0039": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0040": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0041": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0042": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0043": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0044": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0045": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0046": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0047": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0048": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0049": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0050": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0051": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0052": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0053": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0054": { name: "Demo Student", section: "Demo", phone: "" },
+    "DEMO0055": { name: "Demo Student", section: "Demo", phone: "" },
             "1": { "name": "Parasdeep", "section": "1", "phone": "0" },
             "2": { "name": "Prabhjot", "section": "1", "phone": "01" },
             "3": { "name": "Nishtha", "section": "1", "phone": "02" },
@@ -278,19 +278,19 @@ const appId = 'campus-express';
         console.warn("Auth fallback:", error.message);
     }
 };
-        
+
         // Wait for Authentication steps to complete before attempting Database Connection
         await initAuth();
 
         // Listen for Real-time database updates from other devices
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            
-            // Allow proceeding without a user ONLY if you are running locally (using your public database rules). 
+
+            // Allow proceeding without a user ONLY if you are running locally (using your public database rules).
             if (!user && isCanvasEnv) return;
 
             const seatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'bus_seats');
-            
+
             onSnapshot(seatsRef, (snapshot) => {
                 snapshot.forEach(document => {
                     if(seats[document.id]) {
@@ -354,17 +354,17 @@ const appId = 'campus-express';
         function renderSeat(id) {
             const s = seats[id];
             const isSel = selected.includes(id);
-            
+
             let cls = "seat relative w-10 h-11 sm:w-12 sm:h-14 rounded-t-xl rounded-b-md border-2 flex flex-col items-center justify-center text-xs sm:text-sm font-bold select-none cursor-pointer overflow-hidden ";
             let title = `Seat ${id}`;
             let cushion = "bg-emerald-100";
             let content = `<span class="z-10 mb-1.5">${id}</span>`;
-            
+
             if(s.booked) {
                 cls += "bg-slate-200 border-slate-300 text-slate-500 cursor-not-allowed";
                 title = `Booked by ${s.name}`;
                 cushion = "bg-slate-300";
-                
+
                 const firstName = s.name.split(' ')[0];
                 content = `
                     <span class="z-10 text-[9px] sm:text-[10px] leading-none mt-1 sm:mt-0 opacity-70">${id}</span>
@@ -376,7 +376,7 @@ const appId = 'campus-express';
             } else {
                 cls += "bg-white border-emerald-500 text-slate-600 hover:bg-emerald-50";
             }
-            
+
             return `
                 <div class="${cls}" onclick="toggleSeat('${id}')" title="${title}">
                     <div class="absolute bottom-1 w-[70%] h-2 sm:h-2.5 rounded-[3px] ${cushion}"></div>
@@ -411,7 +411,7 @@ const appId = 'campus-express';
             const nameInput = document.getElementById(`name-${seatId}`);
             const statusIcon = document.getElementById(`status-${seatId}`);
             const enteredUID = uidInput.value.trim().toUpperCase();
-            
+
             if (studentDatabase[enteredUID]) {
                 nameInput.value = studentDatabase[enteredUID].name;
                 uidInput.classList.remove('border-slate-300', 'border-rose-500');
@@ -442,7 +442,7 @@ const appId = 'campus-express';
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">UNIVERSITY UID</label>
-                            <input type="text" id="uid-${id}" onkeyup="checkUID('${id}')" placeholder="e.g. 24BAI70259" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm outline-none transition uppercase">
+                            <input type="text" id="uid-${id}" onkeyup="checkUID('${id}')" placeholder="e.g. DEMO0001" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm outline-none transition uppercase">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1">STUDENT NAME (AUTO-FILLED)</label>
@@ -475,7 +475,7 @@ const appId = 'campus-express';
                 if(!studentDatabase[uid]) return showError(`UID ${uid} is NOT in the authorized list.`);
                 if(tempUIDs.has(uid)) return showError(`UID "${uid}" is entered multiple times in this form.`);
                 tempUIDs.add(uid);
-                
+
                 const student = studentDatabase[uid];
                 newEntries.push({ id, uid, name: student.name, section: student.section, phone: student.phone });
             }
@@ -570,7 +570,7 @@ const appId = 'campus-express';
                         }
                     }
                     await batch.commit();
-                    
+
                     selected = [];
                     setTimeout(() => alert('Bus has been successfully reset. All seats are now available.'), 100);
                 } catch (error) {
