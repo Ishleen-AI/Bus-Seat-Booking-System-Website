@@ -8,12 +8,13 @@ load_dotenv(BASE_DIR / ".env")
 
 class Config:
     IS_APP_SERVICE = bool(os.getenv("WEBSITE_SITE_NAME"))
+    IS_PRODUCTION = IS_APP_SERVICE or os.getenv("APP_ENV", "").lower() == "production"
     SECRET_KEY = os.getenv("SECRET_KEY") or "local-development-only-secret"
     DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "database" / "campus_express.db"))
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD") or "local-development-only-password"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = IS_APP_SERVICE
+    SESSION_COOKIE_SECURE = IS_PRODUCTION
     
     # Microsoft Foundry / Azure OpenAI Configuration
     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
@@ -39,10 +40,10 @@ class Config:
         return bool(cls.OPENAI_API_KEY)
 
 
-if Config.IS_APP_SERVICE and (
+if Config.IS_PRODUCTION and (
     len(os.getenv("SECRET_KEY", "")) < 32
     or len(os.getenv("ADMIN_PASSWORD", "")) < 16
 ):
     raise RuntimeError(
-        "App Service requires SECRET_KEY (32+ characters) and ADMIN_PASSWORD (16+ characters)."
+        "Production requires SECRET_KEY (32+ characters) and ADMIN_PASSWORD (16+ characters)."
     )

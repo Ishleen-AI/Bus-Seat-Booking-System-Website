@@ -203,6 +203,16 @@ Configure these App Service environment settings:
 
 The app refuses to start on App Service if the required security settings are missing or too short. Use Azure App Settings for secrets; do not commit them to the repository.
 
+### PythonAnywhere Beginner (Free)
+
+PythonAnywhere's Beginner plan supports one Flask web app and keeps files in the account's home directory. The free plan has restricted outbound internet access, so ExpressAI uses its grounded fallback unless the configured AI endpoint is reachable.
+
+1. Clone this repository in a PythonAnywhere Bash console and install `requirements.txt` in a virtualenv.
+2. Create a manual Python web app using the same Python version as the virtualenv.
+3. Point the WSGI file at this repository and import `app` as `application`.
+4. In the WSGI file, set `APP_ENV` to `production`, `SECRET_KEY` to a unique value of at least 32 characters, `ADMIN_PASSWORD` to a unique value of at least 16 characters, and `DATABASE_PATH` to a path under `/home/<username>/`.
+5. Reload the web app. The app refuses to start in production if the required secrets are missing or too short. Keep them out of GitHub.
+
 ### Step 7: Open in Browser
 - **Student Booking Portal**: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 - **Admin Dashboard**: [http://127.0.0.1:5000/admin](http://127.0.0.1:5000/admin) *(sign in with the configured administrator password)*
